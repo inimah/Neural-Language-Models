@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-#__author__ = "@tita [Iftitahu Ni'mah]"
+#__author__ = "@tita"
 #__date__ = "06.05.2017"
 #__version__ = "1.0.1"
-#__maintainer__ = "@tita [Iftitahu Ni'mah]"
+#__maintainer__ = "@tita"
 #__email__ = "i.nimah@tue.nl"
 
 from __future__ import print_function
@@ -236,17 +236,17 @@ def generatePairset(datadictionary):
 	for i in range(len(langDocs)):
 		tmp = sum(langDocs[i],[])
 		tokens.append(tmp)
-
-    for i in range(len(tokens)): 
-    	# frequency of word across document corpus for each language corpora
-    	# nltk creates pair word - frequency in dictionary format
-    	tfDict = nltk.FreqDist(tokens[i])
-    	worddocs_freq.append(tfDict)
-    	terms = tfDict.keys()
-    	# add 'zero' as the first vocab and 'UNK' as unknown words
-    	terms.insert(0,'zero')
-    	terms.append('UNK')
-    	vocab[i] = dict([(j,terms[j]) for j in range(len(terms))])
+	
+	for i in range(len(tokens)): 
+		# frequency of word across document corpus for each language corpora
+		# nltk creates pair word - frequency in dictionary format
+		tfDict = nltk.FreqDist(tokens[i])
+		worddocs_freq.append(tfDict)
+		terms = tfDict.keys()
+		# add 'zero' as the first vocab and 'UNK' as unknown words
+		terms.insert(0,'zero')
+		terms.append('UNK')
+		vocab[i] = dict([(j,terms[j]) for j in range(len(terms))])
 
 	
 	# save vocabulary list
@@ -429,13 +429,13 @@ def getSentencesClass(datadict):
 	return sentences
 
 ## transform to numeric form of sentences
-def sentenceToNum(sentences):
+def sentenceToNum(sentences, vocab):
 	numSentences = []
 	
 	# number of language/class
 	for i in range(len(sentences)):
 		sent = []
-	    sentdoc = []
+		sentdoc = []
 		# number of documents in corresponding language / class
 		for j in range(len(sentences[i])):
 			# for each document, transform sentences to numeric sentences
@@ -528,12 +528,24 @@ def getStatDocs():
 	return 0 
 
 
-# matrix vectorization for sentences in a document (3D matrix, i: n sentences in a document, j: )
-def sentenceMatrixVectorization(sentenceInDoc, nVocab, nTimeSequence):
-	sequences = np.zeros((len(word_sentences), nTimeSequence, nVocab))
-	for i, sentence in enumerate(word_sentences):
+# Shuffling sentences ( in every epoch to avoid local minima )
+def shuffleSentences(numericSentences):
+	sentences = np.array(numericSentences)
+	indices = np.arange(len(sentences))
+	sentences = sentences[indices]
+
+	return sentences
+
+
+# matrix vectorization for sentences in a document (3D matrix, i: n sentences in a document, j: time_steps or length of a sentence, k: )
+# turn a numeric sequence of words in a sentence  into one-hot vector
+def sentenceMatrixVectorization(sentences,maxlenSentence,nVocab):
+	# create zero matrix
+	sequences = np.zeros((len(sentences), maxlenSentence, nVocab))
+	for i, sentence in enumerate(sentences):
 		for j, word in enumerate(sentence):
 			sequences[i, j, word] = 1
+	return sequences
 
 
 
@@ -694,29 +706,4 @@ def generateEmbedding(documents, vocab, argsize, argiter):
 ################################################
  
 
-#if __name__ == '__main__':
 
-#   get list of data files
-#	filenames = listData(TEXT_PATH)
-
-#	datadict = getClassLabel(filenames)
-#	mergedTokens, worddocs_freq, vocab, alltokens, alldocs  = generateTrainset(datadict)
-
-#   pretrain word embedding from document corpus with word2vec
-#	embedding = generateEmbedding(mergedTokens, vocab, 100, 50)
-#	numericdict = stringToNominalClass(alldocs)
-#	minlength, maxlength, avglength = getMinMaxAvgLength(numericdict)
-#   sentences = getSentencesClass(alltokens)
-#   try printing a sample of sentence
-#   printSentencesClass(0, 0, 0, sentences)
-#   transform to numerical sentenes
-#   numSentences = sentenceToNum(sentences)
-
-
-#   splitting training, validation, test sets (in dictionary format)
-#	train, validate, test = splitDataDict(numericdict, train_percent=.6, validate_percent=.2, seed=None)
-	
-
-#	xTrain, yTrain = dictToArray(train)
-#	xValidate, yValidate = dictToArray(validate)
-#	xTest, yTest = dictToArray(test)
