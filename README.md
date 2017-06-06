@@ -7,3 +7,8 @@ version 1.0:
 - The resulting trained weights from bi-lingual sequence model (machine translation task) will be shared in weights/ for further analysis purpose.
 - labelled mono-language mail datasets (English language) used in this experiment: Enron mail data set, Lingspam mail data set, Spamassasin mail data set. A compact pre-processed labelled data in python dictionary format will be shared in data/ for reproducible research.
 - unlabelled mono-language mail data sets (Dutch language) is sampled from raw mail data suspected as phising emails. The data won't be publicly available, but the author will use another sample set for tutorial purposes (if necessary).
+
+For the purpose of tutorial of the codes:
+- Pre-processing : preprocessing.ipynb
+- Sequence-to-sequence learning of bilingual parallel corpora : bilingual_learning.ipynb
+- Analysing the weights : analyse_weights.ipynb
