@@ -528,16 +528,19 @@ def getSentencesClass(datadict):
 # for monolingual WE corpus
 def sentToNum(sentences, vocab):
 	numSentences = []
-	sentdoc = []
-	# document level
+	
+	
+	# for number of classes in document corpus (e.g. spam and non-spam)
 	for i in range(len(sentences)):
-		# sentence level
-		# for each document, transform sentences to numeric sentences
+		sentdoc = []
+		# number of documents within class member
 		for j in range(len(sentences[i])):
+			sent = []
+			# number of sentences within a document
 			for k in range(len(sentences[i][j])):
-				sent = wordsToIndex(vocab, sentences[i][j][k])
-		sentdoc.append(sent)
-	numSentences.append(sentdoc)
+				sent.append(wordsToIndex(vocab, sentences[i][j][k]))
+			sentdoc.append(sent)
+		numSentences.append(sentdoc)
 
 	return numSentences
 
