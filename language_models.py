@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #__author__ = "@tita"
-#__date__ = "20.05.2017"
+#__update__ = "06.06.2017"
 #__version__ = "1.0.1"
 #__maintainer__ = "@tita"
 #__email__ = "i.nimah@tue.nl"
