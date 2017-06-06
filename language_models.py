@@ -43,15 +43,11 @@ def docEmbedding(documents, vocab, argsize, argiter):
     return embedding
 
 
-def seqEncoderDecoder(batchSize,embeddingLength, timeSteps, xTrain, yTrain, xVal, yVal, xTest, yTest):
-
-	x_train = sequence.pad_sequences(xTrain, maxlen=timeSteps)
-	x_val = sequence.pad_sequences(xVal, maxlen=timeSteps)
-    X_test = sequence.pad_sequences(xTest, maxlen=timeSteps) 
+def seqEncoderDecoder(X_vocab_len, embedding_dim,X_max_len,y_max_len,hidden_size,num_layers):
 
 
-        # Creating encoder network
-    model.add(Embedding(X_vocab_len, 200, input_length=X_max_len, mask_zero=True))
+    # Creating encoder network
+    model.add(Embedding(X_vocab_len, y_vocab_len, embedding_dim, input_length=X_max_len, mask_zero=True))
     model.add(LSTM(hidden_size))
     model.add(RepeatVector(y_max_len))
 
@@ -63,16 +59,15 @@ def seqEncoderDecoder(batchSize,embeddingLength, timeSteps, xTrain, yTrain, xVal
     model.compile(loss='categorical_crossentropy',
             optimizer='rmsprop',
             metrics=['accuracy'])
+    print(model.summary())
     return model
 
-def seqBinClassifier():
-	model.add(Embedding(X_vocab_len, 200, input_length=X_max_len, mask_zero=True))
+def seqBinClassifier(X_vocab_len,embedding_dim,X_max_len,hidden_size):
+	model.add(Embedding(X_vocab_len, embedding_dim, input_length=X_max_len, mask_zero=True))
 	model.add(LSTM(hidden_size))
 	model.add(Dense(1, activation='sigmoid'))
 	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 	print(model.summary())
 	return model
 
-
-if __name__ == '__main__':
 	
