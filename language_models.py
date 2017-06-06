@@ -30,15 +30,17 @@ def wordEmbedding(documents, vocab, argsize, argiter):
     saveH5File('embedding.h5','embedding',embedding)
     return embedding
 
-
+## to-be-added
 def docEmbedding(documents, vocab, argsize, argiter):
 
     model = Doc2Vec(size=argsize, window=10, min_count=5, workers=10, alpha=0.025, min_alpha=0.025)
-    model.build_vocab(sentences)
+    embedding = np.zeros(shape=(len(documents), argsize), dtype='float32')
+    
     for epoch in range(argiter):
-        model.train(sentences)
+        model.train(documents)
         model.alpha -= 0.002  # decrease the learning rate
         model.min_alpha = model.alpha  # fix the learning rate, no decay
+    
     return embedding
 
 
