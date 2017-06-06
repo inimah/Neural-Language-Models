@@ -4,5 +4,5 @@ The series of experiments focus on classifying mail data sets using Mono-Languag
 
 version 1.0:
 - a parallel corpus of English and Dutch document is used http://www.statmt.org/europarl/
-- labelled mono-language mail datasets (English language) used in this experiment: Enron mail data set, Lingspam mail data set, Spamassasin mail data set.
+- labelled mono-language mail datasets (English language) used in this experiment: Enron mail data set, Lingspam mail data set, Spamassasin mail data set. A compact pre-processed labelled data in python dictionary format will be shared for reproducible research.
 - unlabelled mono-language mail data sets (Dutch language) is sampled from raw mail data suspected as phising emails. The data won't be publicly available, but the author will use another sample set for tutorial purposes (if necessary).
