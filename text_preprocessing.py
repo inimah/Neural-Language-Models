@@ -34,14 +34,6 @@ import deepdish as dd
 np.random.seed([3,1415])
 
 
-ENRON_PATH = 'data/enron/maildata'
-POLYGOT_PATH = 'data/multilingual/polygot'
-EUROPARL1_PATH = 'data/multilingual/europarl/txt'
-EUROPARL2_PATH = 'data/multilingual/europarl/nl-en'
-TED_PATH = 'data/multilingual/ted'
-TEST_PATH = 'data/multilingual/test'
-
-
 
 '''
 # Regex pattern. Currently is not used, replaced by nltk.word_tokenize library that has covered everything declared here...
@@ -244,7 +236,7 @@ def generatePairset(datadictionary):
 		worddocs_freq.append(tfDict)
 		terms = tfDict.keys()
 		# add 'zero' as the first vocab and 'UNK' as unknown words
-		terms.insert(0,'zero')
+		terms.insert(0,'zerostart')
 		terms.append('UNK')
 		vocab[i] = dict([(j,terms[j]) for j in range(len(terms))])
 
@@ -252,7 +244,7 @@ def generatePairset(datadictionary):
 	# save vocabulary list
 	savePickle(vocab,'vocabulary')
 	# alternative - saving as h5 file
-	#saveH5File('vocabulary.h5','vocabulary',vocab)
+	saveH5Dict('vocabulary.h5',vocab)
 
 	cnt = 0
 	for k in alltokens:
@@ -326,6 +318,110 @@ def generateTrainset(datadictionary):
 	   
 
 	return mergedTokens, worddocs_freq, vocab, alltokens, alldocs
+
+# creating word vocabulary and training sets
+# for "LingSpam" data set
+################################################
+def generateLingSpam(datadictionary):
+
+	subj = dict()
+	cont = dict()
+
+	allSubj = dict()
+	allMail = dict()
+	
+
+	for k in datadictionary:
+		subject = []
+		content = []
+		for mail in datadictionary[k]:
+			
+			with open(mail) as f:
+				for i,line in enumerate(f):		
+					if i == 0:
+						tmpSubj = line
+						# get tokenized subject title
+						lSubj = tmpSubj.lower()
+						keyword = 'subject:'
+						# get title after keyword
+						beforeKey, inKey, afterKey = lSubj.partition(keyword)
+						# tokenize
+						subjTitle = nltk.word_tokenize(afterKey.decode('utf-8','ignore'))
+					else:
+						tmpCont = line
+						# get tokenized content
+						contWords = nltk.word_tokenize(tmpCont.decode('utf-8','ignore')) 
+
+			subject.append(subjTitle)
+			content.append(contWords)
+
+		subj[k] = subject
+		cont[k] = content
+
+    # generate tokens from subject title
+	subjTokens = [value for key, value in subj.items()]
+	subjAllTokens = sum(subjTokens,[])
+
+	# frequency of word across document corpus
+	subjFreq = nltk.FreqDist(itertools.chain(*subjAllTokens)) 
+	subjUnique = subjFreq.keys()
+	# add 'zero' as the first vocab and 'UNK' as unknown words
+	subjUnique.insert(0,'zero')
+	subjUnique.append('UNK')
+	# indexing word vocabulary : pairs of (index,word)
+	subjVocab=dict([(i,subjUnique[i]) for i in range(len(subjUnique))])
+	# save vocabulary list
+	savePickle(subjVocab,'subject_vocabulary')
+
+	# generate tokens from mail contents
+	contentTokens = [value for key, value in cont.items()]
+	contentAllTokens = sum(contentTokens,[])
+
+	# frequency of word across document corpus
+	contFreq = nltk.FreqDist(itertools.chain(*contentAllTokens)) 
+	contUnique = contFreq.keys()
+	# add 'zero' as the first vocab and 'UNK' as unknown words
+	contUnique.insert(0,'zero')
+	contUnique.append('UNK')
+	# indexing word vocabulary : pairs of (index,word)
+	contVocab=dict([(i,contUnique[i]) for i in range(len(contUnique))])
+	# save vocabulary list
+	savePickle(contVocab,'mail_vocabulary')
+
+	# encode tokenized of words in document into its index/numerical val. in vocabulary list
+	# for subject
+	for k in subj:
+		numericSubj =[]
+		for i in range(len(subj[k])):
+			numericSubj.append(wordsToIndex(subjVocab,subj[k][i]))
+		allSubj[k] = numericSubj
+
+
+	# for content of mail 
+	for k in cont:
+		numericCont =[]
+		for i in range(len(cont[k])):
+			numericCont.append(wordsToIndex(contVocab,cont[k][i]))
+		allCont[k] = numericCont
+	
+	savePickle(allSubj,'allSubjects')
+	# alternative - saving as h5 file
+	saveH5Dict('allSubjects.h5',allSubj)	
+
+	savePickle(allCont,'allMails')
+	# alternative - saving as h5 file
+	saveH5Dict('allMails.h5',allCont)	
+
+
+	return subjVocab, contVocab, subjAllTokens, contentAllTokens, allSubj, allCont
+
+# creating word vocabulary and training sets
+# for "Spamassasin" data set
+################################################
+def generateSpamAssasin(datadictionary):
+
+	return 0
+
 
 # characters for end-of-sentence markers
 ################################################
@@ -429,7 +525,25 @@ def getSentencesClass(datadict):
 	return sentences
 
 ## transform to numeric form of sentences
-def sentenceToNum(sentences, vocab):
+# for monolingual WE corpus
+def sentToNum(sentences, vocab):
+	numSentences = []
+	sentdoc = []
+	# document level
+	for i in range(len(sentences)):
+		# sentence level
+		# for each document, transform sentences to numeric sentences
+		for j in range(len(sentences[i])):
+			for k in range(len(sentences[i][j])):
+				sent = wordsToIndex(vocab, sentences[i][j][k])
+		sentdoc.append(sent)
+	numSentences.append(sentdoc)
+
+	return numSentences
+
+## transform to numeric form of sentences
+# for Bi-lingual WE corpus
+def sentToNumBi(sentences, vocab):
 	numSentences = []
 	
 	# number of language/class
@@ -444,6 +558,7 @@ def sentenceToNum(sentences, vocab):
 			sentdoc.append(sent)
 		numSentences.append(sentdoc)
 
+	return numSentences
 
 
 # return array of sentences / documents in a corpus
@@ -457,6 +572,9 @@ def getSentencesAll(datadict):
 
 	return sentences
 
+# for doc2vector input
+def createLabelledSentences():
+	return 0
 
 def printSentencesClass(classid, docid, sentid, sentences):
 	for i in range(len(sentences)):
@@ -522,10 +640,6 @@ def getStatClass(sentences):
 
 
 	return nSentences, nWords, minSent, maxSent, sumSent, avgSent, minWords, maxWords, sumWords, avgWords
-
-# get statistics (number of sentences, number of words) from all document corpus
-def getStatDocs():
-	return 0 
 
 
 # Shuffling sentences ( in every epoch to avoid local minima )
@@ -671,39 +785,5 @@ def splitDataArr(arrdata, train_percent=.6, validate_percent=.2, seed=None):
 	saveH5File('test.h5','testset',test)
 
 	return train, validate, test
-
-
-# generate embedding of the corresponding training data sets, 
-################################################
-def generateEmbedding(documents, vocab, argsize, argiter):
-
-	model = Word2Vec(documents, size=argsize, min_count=5, window=5, sg=1, iter=argiter)
-	weights = model.wv.syn0
-	d = dict([(k, v.index) for k, v in model.wv.vocab.items()])
-	embedding = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
-
-	for i, w in vocab.items():
-		if w not in d:continue
-		embedding[i, :] = weights[d[w], :]
-	savePickle(embedding,'embedding')
-	# alternative - saving as h5 file
-	#saveH5File('embedding.h5','embedding',embedding)
-	return embedding
-
-
-# check whether monolingual corpus has same number of documents, if not print the differences 
-################################################
-#def checkParalelCorpus():
-#	return 0
-
-# expand word embedding 
-################################################
-#def expandEmbedding():
-#	return 0
-
-
-# 
-################################################
- 
 
 
