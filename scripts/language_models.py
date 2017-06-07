@@ -47,7 +47,7 @@ def seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, embedding_
 
     model = Sequential()
     # Creating encoder network
-    model.add(Embedding(X_vocab_len, y_vocab_len, embedding_dim, input_length=X_max_len, mask_zero=True))
+    model.add(Embedding(X_vocab_len, embedding_dim, input_length=X_max_len, mask_zero=True))
     model.add(LSTM(hidden_size))
     model.add(RepeatVector(y_max_len))
 
@@ -56,20 +56,18 @@ def seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, embedding_
         model.add(LSTM(hidden_size, return_sequences=True))
     model.add(TimeDistributed(Dense(y_vocab_len)))
     model.add(Activation('softmax'))
-    model.compile(loss='categorical_crossentropy',
-            optimizer='rmsprop',
-            metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
     print(model.summary())
     return model
 
 def seqBinClassifier(X_vocab_len,embedding_dim,X_max_len,hidden_size):
 
     model = Sequential()
-	model.add(Embedding(X_vocab_len, embedding_dim, input_length=X_max_len, mask_zero=True))
-	model.add(LSTM(hidden_size))
-	model.add(Dense(1, activation='sigmoid'))
-	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-	print(model.summary())
-	return model
+    model.add(Embedding(X_vocab_len, embedding_dim, input_length=X_max_len, mask_zero=True))
+    model.add(LSTM(hidden_size))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    print(model.summary())
+    return model
 
 	
