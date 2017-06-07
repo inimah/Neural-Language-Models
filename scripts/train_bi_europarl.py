@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	# maximum length of word sequence in non-english (e.g. nl) sentences
 	y_max_len = maxWords[1][0]
 
-	print('[INFO] Zero padding...')\
+	print('[INFO] Zero padding...')
 	X = pad_sequences(numSentences[0][0], maxlen=X_max_len, dtype='int32')
 	y = pad_sequences(numSentences[1][0], maxlen=y_max_len, dtype='int32')
 
