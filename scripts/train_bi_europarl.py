@@ -72,4 +72,40 @@ if __name__ == '__main__':
 	print('[INFO] Compiling model...')
 	model = create_model(X_vocab_len, X_max_len, y_vocab_len, y_max_len, HIDDEN_DIM, LAYER_NUM)
 
+	saved_weights = findWeights('../weights')
+
+	_N = X_max_len
+
+	if MODE == 'train':
+		_start = 1
+		# If any trained weight was found, then load them into the model
+		if len(saved_weights) != 0:
+			print('[INFO] Saved weights found, loading...')
+			epoch = saved_weights[saved_weights.rfind('_')+1:saved_weights.rfind('.')]
+			model.load_weights(saved_weights)
+			_start = int(epoch) + 1
+
+		_end = 0
+		for k in range(_start, NB_EPOCH+1):
+			# Shuffling the training data every epoch to avoid local minima
+			xShuffled = shuffleSentences(X)
+			yShuffled = shuffleSentences(y)
+
+			# Training n sequences at N time - N can be the number of time steps / sequence length
+			for i in range(0, len(xShuffled), _N):
+				if i + _N >= len(xShuffled):
+					i_end = len(xShuffled)
+				else:
+					i_end = i + _N
+
+				# encode y output to one-hot vector (since the output has no embedding layer)
+				yEncoded = sentenceMatrixVectorization(yShuffled[i:i_end], y_max_len, y_vocab_len)
+
+				print('[INFO] Training model: epoch {}th {}/{} samples'.format(k, i, len(X)))
+
+				model.fit(xShuffled[i:i_end], yEncoded, batch_size=BATCH_SIZE, nb_epoch=1, verbose=2)
+			model.save_weights('weights_{}.hdf5'.format(k))
+
+
+
 	
