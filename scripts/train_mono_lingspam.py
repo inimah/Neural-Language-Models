@@ -29,15 +29,9 @@ HIDDEN_DIM = args['hidden_dim']
 NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
-ENRON_PATH = 'data/maildata/enron'
+
 LINGSPAM_PATH = 'data/maildata/lingspam'
-# data/enron/maildata/lingspam
-SPAMASSASIN_PATH = 'data/maildata/spamassasin'
-POLYGOT_PATH = 'data/multilingual/polygot'
-EUROPARL1_PATH = 'data/multilingual/europarl/txt'
-EUROPARL2_PATH = 'data/multilingual/europarl/nl-en'
-TED_PATH = 'data/multilingual/ted'
-TEST_PATH = 'data/multilingual/test'
+
 
 if __name__ == '__main__':
 	# get list of data files
