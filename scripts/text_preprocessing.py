@@ -579,15 +579,18 @@ def sentToNumBi(sentences, vocab):
 # for Bi-lingual WE corpus
 def sentToWordsBi(doc, vocab):
 	sentences = []
-	
+	_n = 0
 	# number of language/class
-	for i in range(len(doc)):
+	for i in doc:
+
 		sent = []
 	
 		# number of documents in corresponding language / class
 		for j in range(len(doc[i])):
 			# for each document, revert numeric to word sequence
-			sent.append(indexToWords(vocab[i], doc[i][j]))
+			sent.append(indexToWords(vocab[_n], doc[i][j]))
+
+		_n += 1
 			
 		sentences.append(sent)
 
