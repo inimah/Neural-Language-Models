@@ -71,7 +71,7 @@ if __name__ == '__main__':
 	y = pad_sequences(numSentences[1][0], maxlen=y_max_len, dtype='int32')
 
 	print('[INFO] Compiling model...')
-	model = seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, HIDDEN_DIM, LAYER_NUM)
+	model = seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM, HIDDEN_DIM, LAYER_NUM)
 
 	saved_weights = findWeights('../weights')
 

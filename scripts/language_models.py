@@ -43,7 +43,7 @@ def docEmbedding(documents, vocab, argsize, argiter):
     return embedding
 
 
-def seqEncoderDecoder(X_vocab_len, embedding_dim,X_max_len,y_max_len,hidden_size,num_layers):
+def seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, embedding_dim, hidden_size, num_layers):
 
     model = Sequential()
     # Creating encoder network
