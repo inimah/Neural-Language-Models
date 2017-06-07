@@ -789,4 +789,11 @@ def splitDataArr(arrdata, train_percent=.6, validate_percent=.2, seed=None):
 
 	return train, validate, test
 
-
+# find saved weights
+def findWeights(folder):
+	findFile = [f for f in os.listdir(folder) if 'weights' in f]
+	if len(findFile) == 0:
+		return []
+	modified_time = [os.path.getmtime(f) for f in findFile]
+	lastEpoch = findFile[np.argmax(modified_time)]
+	return lastEpoch
