@@ -578,7 +578,7 @@ def sentToNumBi(sentences, vocab):
 # for the purpose of splitting document into sentences
 # for Bi-lingual WE corpus
 def sentToWordsBi(doc, vocab):
-	sentences = []
+	sentences = dict()
 	_n = 0
 	# number of language/class
 	for i in doc:
@@ -592,7 +592,7 @@ def sentToWordsBi(doc, vocab):
 
 		_n += 1
 			
-		sentences.append(sent)
+		sentences[i] = sent
 
 	return sentences
 
