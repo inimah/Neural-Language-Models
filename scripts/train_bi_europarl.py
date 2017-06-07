@@ -33,12 +33,12 @@ NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
-TEST_PATH = 'data/multilingual/test'
+PATH = 'data/multilingual/europarl'
 
 if __name__ == '__main__':
 	
 	# get list of data files
-	filenames = listData(TEST_PATH)
+	filenames = listData(PATH)
     
     # grouped by class
 	datadict = getClassLabel(filenames)

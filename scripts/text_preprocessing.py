@@ -524,6 +524,17 @@ def getSentencesClass(datadict):
 		sentences.append(tmp)
 	return sentences
 
+
+## For encoded document (in numeric sequence)
+def getSentencesClassNum(datadict):
+	sentences = []
+	for key in datadict:
+		tmp = []
+		for i in range(len(datadict[key])):
+			tmp.append(splitSentences(datadict[key][i]))
+		sentences.append(tmp)
+	return sentences
+
 ## transform to numeric form of sentences
 # for monolingual WE corpus
 def sentToNum(sentences, vocab):
@@ -562,6 +573,25 @@ def sentToNumBi(sentences, vocab):
 		numSentences.append(sentdoc)
 
 	return numSentences
+
+## revert stored numeric sequence of sentences to word sequence format
+# for the purpose of splitting document into sentences
+# for Bi-lingual WE corpus
+def sentToWordsBi(doc, vocab):
+	sentences = []
+	
+	# number of language/class
+	for i in range(len(doc)):
+		sent = []
+	
+		# number of documents in corresponding language / class
+		for j in range(len(doc[i])):
+			# for each document, revert numeric to word sequence
+			sent.append(indexToWords(vocab[i], doc[i][j]))
+			
+		sentences.append(sent)
+
+	return sentences
 
 
 # return array of sentences / documents in a corpus
