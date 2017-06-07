@@ -45,7 +45,7 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
 def seqEncoderDecoder(X_vocab_len, embedding_dim,X_max_len,y_max_len,hidden_size,num_layers):
 
-
+    model = Sequential()
     # Creating encoder network
     model.add(Embedding(X_vocab_len, y_vocab_len, embedding_dim, input_length=X_max_len, mask_zero=True))
     model.add(LSTM(hidden_size))
@@ -63,6 +63,8 @@ def seqEncoderDecoder(X_vocab_len, embedding_dim,X_max_len,y_max_len,hidden_size
     return model
 
 def seqBinClassifier(X_vocab_len,embedding_dim,X_max_len,hidden_size):
+
+    model = Sequential()
 	model.add(Embedding(X_vocab_len, embedding_dim, input_length=X_max_len, mask_zero=True))
 	model.add(LSTM(hidden_size))
 	model.add(Dense(1, activation='sigmoid'))

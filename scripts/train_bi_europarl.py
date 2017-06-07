@@ -9,6 +9,7 @@ from __future__ import print_function
 import os
 import sys
 import numpy as np
+from keras.preprocessing.sequence import pad_sequences
 from text_preprocessing import *
 from language_models import *
 
@@ -66,11 +67,11 @@ if __name__ == '__main__':
 	y_max_len = maxWords[1][0]
 
 	print('[INFO] Zero padding...')\
-	X = pad_sequences(numSentences[0], maxlen=X_max_len, dtype='int32')
-	y = pad_sequences(numSentences[1], maxlen=y_max_len, dtype='int32')
+	X = pad_sequences(numSentences[0][0], maxlen=X_max_len, dtype='int32')
+	y = pad_sequences(numSentences[1][0], maxlen=y_max_len, dtype='int32')
 
 	print('[INFO] Compiling model...')
-	model = create_model(X_vocab_len, X_max_len, y_vocab_len, y_max_len, HIDDEN_DIM, LAYER_NUM)
+	model = seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, HIDDEN_DIM, LAYER_NUM)
 
 	saved_weights = findWeights('../weights')
 
