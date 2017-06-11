@@ -6,6 +6,9 @@
 #__email__ = "i.nimah@tue.nl"
 
 from __future__ import print_function
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt 
 import os
 import sys
 import numpy as np
@@ -13,9 +16,7 @@ from keras.preprocessing.sequence import pad_sequences
 from text_preprocessing import *
 from language_models import *
 from keras.callbacks import Callback
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt 
+
 
 import argparse
 
@@ -135,7 +136,7 @@ if __name__ == '__main__':
 				model.save_weights('sentweights_{}_{}.hdf5'.format(k,i))
 			model.save_weights('weights_{}.hdf5'.format(k))
 
-		plt.figure(figsize=(6, 3))
+		#plt.figure(figsize=(6, 3))
 		plt.plot(history.losses)
 		plt.ylabel('error')
 		plt.xlabel('iteration')
@@ -143,7 +144,7 @@ if __name__ == '__main__':
 		plt.savefig('loss.png')
 		plt.close()
 
-		plt.figure(figsize=(6, 3))
+		#plt.figure(figsize=(6, 3))
 		plt.plot(history.acc)
 		plt.ylabel('accuracy')
 		plt.xlabel('iteration')
