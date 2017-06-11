@@ -13,6 +13,9 @@ from keras.preprocessing.sequence import pad_sequences
 from text_preprocessing import *
 from language_models import *
 from keras.callbacks import Callback
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt 
 
 import argparse
 
