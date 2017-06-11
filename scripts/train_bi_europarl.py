@@ -16,7 +16,7 @@ from language_models import *
 import argparse
 
 ap = argparse.ArgumentParser()
-ap.add_argument('-batch_size', type=int, default=100)
+ap.add_argument('-batch_size', type=int, default=1)
 ap.add_argument('-layer_num', type=int, default=3)
 ap.add_argument('-hidden_dim', type=int, default=200)
 ap.add_argument('-embedding_dim', type=int, default=200)
@@ -33,14 +33,14 @@ NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
-PATH = 'data/multilingual/europarl'
+PATH = '../../../exp/data/multilingual/test'
 
 if __name__ == '__main__':
 	
 	# get list of data files
 	filenames = listData(PATH)
     
-    # grouped by class
+        # grouped by class
 	datadict = getClassLabel(filenames)
 
 	# return tokenized subject and mail content 
@@ -75,8 +75,8 @@ if __name__ == '__main__':
 
 	saved_weights = findWeights('../weights')
 
-	_N = X_max_len
-
+	#_N = X_max_len
+	_N = 1
 	if MODE == 'train':
 		_start = 1
 		# If any trained weight was found, then load them into the model
@@ -105,6 +105,7 @@ if __name__ == '__main__':
 				print('[INFO] Training model: epoch {}th {}/{} samples'.format(k, i, len(X)))
 
 				model.fit(xShuffled[i:i_end], yEncoded, batch_size=BATCH_SIZE, nb_epoch=1, verbose=2)
+				model.save_weights('sentweights_{}_{}.hdf5'.format(k,i))
 			model.save_weights('weights_{}.hdf5'.format(k))
 
 
