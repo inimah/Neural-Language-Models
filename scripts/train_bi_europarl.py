@@ -12,6 +12,7 @@ import numpy as np
 from keras.preprocessing.sequence import pad_sequences
 from text_preprocessing import *
 from language_models import *
+from keras.callbacks import Callback
 
 import argparse
 
@@ -35,7 +36,12 @@ MODE = args['mode']
 
 PATH = '../../../exp/data/multilingual/test'
 
+
+
+
 if __name__ == '__main__':
+
+
 	
 	# get list of data files
 	filenames = listData(PATH)
@@ -75,6 +81,20 @@ if __name__ == '__main__':
 
 	saved_weights = findWeights('../weights')
 
+	class TrainingHistory(Callback):
+	def on_train_begin(self, logs={}):
+		self.losses = []
+		self.acc = []
+		self.predictions = []
+		self.i = 0
+		self.save_every = 50
+	def on_batch_end(self, batch, logs={}):
+		self.losses.append(logs.get('loss'))
+		self.acc.append(logs.get('acc'))
+		self.i += 1
+		
+	history = TrainingHistory()
+
 	#_N = X_max_len
 	_N = 1
 	if MODE == 'train':
@@ -104,7 +124,25 @@ if __name__ == '__main__':
 
 				print('[INFO] Training model: epoch {}th {}/{} samples'.format(k, i, len(X)))
 
-				model.fit(xShuffled[i:i_end], yEncoded, batch_size=BATCH_SIZE, nb_epoch=1, verbose=2)
+				model.fit(xShuffled[i:i_end], yEncoded, batch_size=BATCH_SIZE, nb_epoch=1, verbose=2, callbacks=[history])
+
+				plt.figure(figsize=(6, 3))
+				plt.plot(history.losses)
+				plt.ylabel('error')
+				plt.xlabel('iteration')
+				plt.title('training error')
+				plt.savefig('loss.png')
+				plt.close()
+
+				plt.figure(figsize=(6, 3))
+				plt.plot(history.acc)
+				plt.ylabel('accuracy')
+				plt.xlabel('iteration')
+				plt.title('training accuracy')
+				plt.savefig('acc.png')
+				plt.close()
+
+
 				model.save_weights('sentweights_{}_{}.hdf5'.format(k,i))
 			model.save_weights('weights_{}.hdf5'.format(k))
 
