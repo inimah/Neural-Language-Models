@@ -16,4 +16,4 @@ module load gcc/5.2.0
 echo "Start = `date`"
 python train_bi_europarl.py
 echo "Finish = `date`"
-EOF
+

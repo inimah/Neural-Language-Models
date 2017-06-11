@@ -100,11 +100,11 @@ if __name__ == '__main__':
 	if MODE == 'train':
 		_start = 1
 		# If any trained weight was found, then load them into the model
-		if len(saved_weights) != 0:
-			print('[INFO] Saved weights found, loading...')
-			epoch = saved_weights[saved_weights.rfind('_')+1:saved_weights.rfind('.')]
-			model.load_weights(saved_weights)
-			_start = int(epoch) + 1
+		#if len(saved_weights) != 0:
+			#print('[INFO] Saved weights found, loading...')
+			#epoch = saved_weights[saved_weights.rfind('_')+1:saved_weights.rfind('.')]
+			#model.load_weights(saved_weights)
+			#_start = int(epoch) + 1
 
 		_end = 0
 		for k in range(_start, NB_EPOCH+1):
