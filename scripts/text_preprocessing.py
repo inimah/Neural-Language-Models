@@ -10,8 +10,8 @@ from __future__ import print_function
 
 import os
 import sys
-#reload(sys)
-#sys.setdefaultencoding('utf-8')
+reload(sys)
+sys.setdefaultencoding('utf-8')
 import tarfile
 import zipfile
 import pandas as pd
@@ -244,7 +244,7 @@ def generatePairset(datadictionary):
 	# save vocabulary list
 	savePickle(vocab,'vocabulary')
 	# alternative - saving as h5 file
-	saveH5Dict('vocabulary.h5',vocab)
+	#saveH5Dict('vocabulary.h5',vocab)
 
 	cnt = 0
 	for k in alltokens:
@@ -257,7 +257,7 @@ def generatePairset(datadictionary):
 	# save all dictionary of all documents (in numerical list format)
 	savePickle(alldocs,'documents')
 	# alternative - saving as h5 file
-	saveH5Dict('documents.h5',alldocs)
+	#saveH5Dict('documents.h5',alldocs)
 
 	   
 
@@ -295,7 +295,7 @@ def generateTrainset(datadictionary):
 	worddocs_freq = nltk.FreqDist(itertools.chain(*mergedTokens)) 
 	uniqueWords = worddocs_freq.keys()
 	# add 'zero' as the first vocab and 'UNK' as unknown words
-	uniqueWords.insert(0,'zero')
+	uniqueWords.insert(0,'zerostart')
 	uniqueWords.append('UNK')
 	# indexing word vocabulary : pairs of (index,word)
 	vocab=dict([(i,uniqueWords[i]) for i in range(len(uniqueWords))])
@@ -313,7 +313,7 @@ def generateTrainset(datadictionary):
 	# save all dictionary of all documents (in numerical list format)
 	savePickle(alldocs,'documents')
 	# alternative - saving as h5 file
-	saveH5Dict('documents.h5',alldocs)
+	#saveH5Dict('documents.h5',alldocs)
 
 	   
 
@@ -366,7 +366,7 @@ def generateLingSpam(datadictionary):
 	subjFreq = nltk.FreqDist(itertools.chain(*subjAllTokens)) 
 	subjUnique = subjFreq.keys()
 	# add 'zero' as the first vocab and 'UNK' as unknown words
-	subjUnique.insert(0,'zero')
+	subjUnique.insert(0,'zerostart')
 	subjUnique.append('UNK')
 	# indexing word vocabulary : pairs of (index,word)
 	subjVocab=dict([(i,subjUnique[i]) for i in range(len(subjUnique))])
@@ -406,11 +406,11 @@ def generateLingSpam(datadictionary):
 	
 	savePickle(allSubj,'allSubjects')
 	# alternative - saving as h5 file
-	saveH5Dict('allSubjects.h5',allSubj)	
+	#saveH5Dict('allSubjects.h5',allSubj)	
 
 	savePickle(allCont,'allMails')
 	# alternative - saving as h5 file
-	saveH5Dict('allMails.h5',allCont)	
+	#saveH5Dict('allMails.h5',allCont)	
 
 
 	return subjVocab, contVocab, subjAllTokens, contentAllTokens, allSubj, allCont
