@@ -126,25 +126,27 @@ if __name__ == '__main__':
 
 				model.fit(xShuffled[i:i_end], yEncoded, batch_size=BATCH_SIZE, nb_epoch=1, verbose=2, callbacks=[history])
 
-				plt.figure(figsize=(6, 3))
-				plt.plot(history.losses)
-				plt.ylabel('error')
-				plt.xlabel('iteration')
-				plt.title('training error')
-				plt.savefig('loss.png')
-				plt.close()
-
-				plt.figure(figsize=(6, 3))
-				plt.plot(history.acc)
-				plt.ylabel('accuracy')
-				plt.xlabel('iteration')
-				plt.title('training accuracy')
-				plt.savefig('acc.png')
-				plt.close()
+				
 
 
 				model.save_weights('sentweights_{}_{}.hdf5'.format(k,i))
 			model.save_weights('weights_{}.hdf5'.format(k))
+
+		plt.figure(figsize=(6, 3))
+		plt.plot(history.losses)
+		plt.ylabel('error')
+		plt.xlabel('iteration')
+		plt.title('training error')
+		plt.savefig('loss.png')
+		plt.close()
+
+		plt.figure(figsize=(6, 3))
+		plt.plot(history.acc)
+		plt.ylabel('accuracy')
+		plt.xlabel('iteration')
+		plt.title('training accuracy')
+		plt.savefig('acc.png')
+		plt.close()
 
 
 
