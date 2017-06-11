@@ -82,16 +82,16 @@ if __name__ == '__main__':
 	saved_weights = findWeights('../weights')
 
 	class TrainingHistory(Callback):
-	def on_train_begin(self, logs={}):
-		self.losses = []
-		self.acc = []
-		self.predictions = []
-		self.i = 0
-		self.save_every = 50
-	def on_batch_end(self, batch, logs={}):
-		self.losses.append(logs.get('loss'))
-		self.acc.append(logs.get('acc'))
-		self.i += 1
+		
+		def on_train_begin(self, logs={}):
+			self.losses = []
+			self.acc = []
+			self.i = 0
+			self.save_every = 50
+		def on_batch_end(self, batch, logs={}):
+			self.losses.append(logs.get('loss'))
+			self.acc.append(logs.get('acc'))
+			self.i += 1
 		
 	history = TrainingHistory()
 
