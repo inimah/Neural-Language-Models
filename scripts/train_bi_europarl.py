@@ -21,7 +21,7 @@ from keras.callbacks import Callback
 import argparse
 
 ap = argparse.ArgumentParser()
-ap.add_argument('-batch_size', type=int, default=1)
+ap.add_argument('-batch_size', type=int, default=100)
 ap.add_argument('-layer_num', type=int, default=3)
 ap.add_argument('-hidden_dim', type=int, default=200)
 ap.add_argument('-embedding_dim', type=int, default=200)
@@ -38,7 +38,7 @@ NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
-PATH = '../../../exp/data/multilingual/test'
+PATH = '../../../exp/data/multilingual/europarl'
 
 
 
@@ -100,15 +100,15 @@ if __name__ == '__main__':
 	history = TrainingHistory()
 
 	#_N = X_max_len
-	_N = 1
+	_N = 100
 	if MODE == 'train':
 		_start = 1
 		# If any trained weight was found, then load them into the model
-		#if len(saved_weights) != 0:
-			#print('[INFO] Saved weights found, loading...')
-			#epoch = saved_weights[saved_weights.rfind('_')+1:saved_weights.rfind('.')]
-			#model.load_weights(saved_weights)
-			#_start = int(epoch) + 1
+		if len(saved_weights) != 0:
+			print('[INFO] Saved weights found, loading...')
+			epoch = saved_weights[saved_weights.rfind('_')+1:saved_weights.rfind('.')]
+			model.load_weights(saved_weights)
+			_start = int(epoch) + 1
 
 		_end = 0
 		loss = []
@@ -139,7 +139,7 @@ if __name__ == '__main__':
 				i_acc.append(history.acc)
 
 				#model.save_weights('sentweights_{}_{}.hdf5'.format(k,i))
-			#model.save_weights('weights_{}.hdf5'.format(k))
+			model.save_weights('weights_{}.hdf5'.format(k))
 
 			loss.append(i_loss)
 			acc.append(i_acc)
@@ -147,22 +147,3 @@ if __name__ == '__main__':
 		savePickle(loss,'err_loss')
 		savePickle(acc,'accuracy')
 
-		#plt.figure(figsize=(6, 3))
-		#plt.plot(history.losses)
-		#plt.ylabel('error')
-		#plt.xlabel('iteration')
-		#plt.title('training error')
-		#plt.savefig('loss.png')
-		#plt.close()
-
-		#plt.figure(figsize=(6, 3))
-		#plt.plot(history.acc)
-		#plt.ylabel('accuracy')
-		#plt.xlabel('iteration')
-		#plt.title('training accuracy')
-		#plt.savefig('acc.png')
-		#plt.close()
-
-
-
-	

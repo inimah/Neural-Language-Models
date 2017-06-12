@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name="lm_tita"
-#SBATCH -N 8          
+#SBATCH -N 10          
 #SBATCH -p gpu        
-#SBATCH -t 12:00:00  
+#SBATCH -t 300:00:00  
 #SBATCH -o output.out
 #SBATCH -e error.err
 #SBATCH --mail-type=END,FAIL
