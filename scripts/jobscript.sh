@@ -2,7 +2,7 @@
 #SBATCH --job-name="lm_tita"
 #SBATCH -N 10          
 #SBATCH -p gpu        
-#SBATCH -t 300:00:00  
+#SBATCH -t 5-00:00:00  
 #SBATCH -o output.out
 #SBATCH -e error.err
 #SBATCH --mail-type=END,FAIL
