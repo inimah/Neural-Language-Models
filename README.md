@@ -12,3 +12,10 @@ For the tutorial purpose of the codes:
 - Pre-processing : preprocessing.ipynb
 - Sequence-to-sequence learning of bilingual parallel corpora : bilingual_learning.ipynb
 - Analysing the weights : analyse_weights.ipynb
+
+Requirements (List of dependencies and installation can also be found in installation.md):
+- Python 2.7 + (Anaconda2 or Miniconda2)
+- tensorflow / theano
+- keras
+- nltk
+- gensim
