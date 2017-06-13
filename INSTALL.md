@@ -50,12 +50,15 @@
 
 ## Test Installation
 python
+
+```
 import tensorflow as tf
 
 graph = tf.constant('Hello world')
 session = tf.Session()
 print(session.run(graph))
 session.close()
+```
 
 ## deactivate/quit conda tensorflow environment
 source deactivate tfenv
