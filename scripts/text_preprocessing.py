@@ -576,6 +576,26 @@ def sentToNumBi(sentences, vocab):
 
 ## revert stored numeric sequence of sentences to word sequence format
 # for the purpose of splitting document into sentences
+# for Mono-lingual WE corpus
+def sentToWords(doc, vocab):
+	sentences = dict()
+
+	# number of class. e.g: spam vs ham (binary class)
+	for i in doc:
+		sent = []	
+		# number of documents in corresponding class
+		for j in range(len(doc[i])):
+			# for each document, revert numeric to word sequence
+			sent.append(indexToWords(vocab, doc[i][j]))
+	
+		sentences[i] = sent
+
+	return sentences
+
+
+
+## revert stored numeric sequence of sentences to word sequence format
+# for the purpose of splitting document into sentences
 # for Bi-lingual WE corpus
 def sentToWordsBi(doc, vocab):
 	sentences = dict()

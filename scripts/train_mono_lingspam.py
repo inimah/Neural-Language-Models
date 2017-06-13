@@ -30,7 +30,7 @@ NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
-LINGSPAM_PATH = 'data/maildata/lingspam'
+LINGSPAM_PATH = 'data/lingspam'
 
 
 if __name__ == '__main__':
@@ -51,9 +51,26 @@ if __name__ == '__main__':
 	# transform to numerical sentences
 	numSentencesMail = sentToNum(sentencesMail,contVocab)
 
+	# check minimum and maximum length of sequence words - dictionary is in numeric format
+	minlength, maxlength, avglength=getMinMaxAvgLength(allSubj)
+
     # specifically for subject title part (short text)
     # create WE version of subject
-    subjWE = wordEmbedding(mergedTokens, subjVocab, 200, 50)
+    # first, put all subjects into one single document
+    allSentences = []
+    for i in allSubj:
+    	allSentences += allSubj[i]
+
+
+    # for training on pre-processed data
+    # variable "allSentences" here is in numeric format - different with the resulting from reading raw data above
+    wordSentences = []
+    for i in range(len(allSentences)):
+    	wordSentences += [indexToWords(subject_vocab,allSentences[i])]
+
+
+
+    subjWE = wordEmbedding(allSentences, subjVocab, 200, 50)
 
     # create doc embedding for mail content
 

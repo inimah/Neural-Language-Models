@@ -12,6 +12,7 @@ from gensim.models import Word2Vec, Doc2Vec
 from keras.models import Sequential
 from keras.layers import *
 from keras.preprocessing import sequence
+from scripts.text_preprocessing import *
 
 
 def wordEmbedding(documents, vocab, argsize, argiter):
@@ -22,11 +23,15 @@ def wordEmbedding(documents, vocab, argsize, argiter):
     embedding = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
 
     for i, w in vocab.items():
-        if w not in d:continue
+
+        if w not in d:
+            continue
         embedding[i, :] = weights[d[w], :]
-    savePickle(embedding,'embedding')
+
+    #savePickle(embedding,'embedding')
     # alternative - saving as h5 file
-    saveH5File('embedding.h5','embedding',embedding)
+    #saveH5File('embedding.h5','embedding',embedding)
+
     return embedding
 
 ## to-be-added
