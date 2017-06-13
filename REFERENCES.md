@@ -2,9 +2,11 @@
 
 **References:**
 
-\[1]. Zhou, X., Wan, X., & Xiao, J. Attention-based LSTM Network for Cross-Lingual Sentiment Classification.
+\[1]. Dai, A. M., & Le, Q. V. (2015). Semi-supervised sequence learning. In Advances in Neural Information Processing Systems (pp. 3079-3087).
 
-\[2]. Liu, P., Qiu, X., & Huang, X. (2016). Recurrent neural network for text classification with multi-task learning. arXiv preprint arXiv:1605.05101.
+\[2]. Zhou, X., Wan, X., & Xiao, J. Attention-based LSTM Network for Cross-Lingual Sentiment Classification.
+
+\[3]. Liu, P., Qiu, X., & Huang, X. (2016). Recurrent neural network for text classification with multi-task learning. arXiv preprint arXiv:1605.05101.
 
 # Cross-language embeddings
 
