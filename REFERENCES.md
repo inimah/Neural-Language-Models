@@ -1,3 +1,9 @@
+# DNN models
+
+**References:**
+
+# Cross-language embeddings
+
 **References:**
 
 \[1]. AP, S. C., Lauly, S., Larochelle, H., Khapra, M., Ravindran, B., Raykar, V. C., & Saha, A. (2014). An autoencoder approach to learning bilingual word representations. In Advances in Neural Information Processing Systems (pp. 1853-1861).
@@ -7,3 +13,5 @@
 \[3]. Upadhyay, S., Faruqui, M., Dyer, C., & Roth, D. (2016). Cross-lingual models of word embeddings: An empirical comparison. arXiv preprint arXiv:1604.00425.
 
 \[4]. Pham, H., Luong, M. T., & Manning, C. D. (2015, June). Learning distributed representations for multilingual text sequences. In Proceedings of NAACL-HLT (pp. 88-94).
+
+\[5]. Vulić, I., & Moens, M. F. (2016). Bilingual distributed word representations from document-aligned comparable data. Journal of Artificial Intelligence Research, 55, 953-994.
