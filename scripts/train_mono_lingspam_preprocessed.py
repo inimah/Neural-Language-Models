@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #__author__ = "@tita"
-#__date__ = "20.05.2017"
-#__version__ = "1.0.1"
+#__update__ = "13.06.2017"
 #__maintainer__ = "@tita"
 #__email__ = "i.nimah@tue.nl"
 
@@ -30,37 +29,38 @@ NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
-LINGSPAM_PATH = 'data/lingspam'
+LINGSPAM_PATH = '../data/lingspam'
 
 
 if __name__ == '__main__':
 
 	# reading stored pre-processed (in pickle format)
 
-	subject_vocab = readPickle('LINGSPAM_PATH/subject_vocabulary') 
-	mail_vocab = readPickle('LINGSPAM_PATH/mail_vocabulary')
-	allSubjects = readPickle('LINGSPAM_PATH/allSubjects')
-	allMails = readPickle('LINGSPAM_PATH/allMails') 
+	subject_vocab = readPickle(os.path.join(LINGSPAM_PATH,'subject_vocabulary'))
+	mail_vocab = readPickle(os.path.join(LINGSPAM_PATH,'mail_vocabulary'))
+	allSubjects = readPickle(os.path.join(LINGSPAM_PATH, 'allSubjects'))
+	allMails = readPickle(os.path.join(LINGSPAM_PATH,'allMails'))
 
-    # specifically for subject title part (short text)
-    # create WE version of subject
-    # first, put all subjects into one single document
-    allSentences = []
-    for i in allSubjects:
-    	allSentences += allSubjects[i]
+	# specifically for subject title part (short text)
+	# create WE version of subject
+	# first, put all subjects into one single document
 
-
-    # for training on pre-processed data
-    # variable "allSentences" here is in numeric format - different with the resulting from reading raw data above
-    wordSentences = []
-    for i in range(len(allSentences)):
-    	wordSentences += [indexToWords(subject_vocab,allSentences[i])]
+	allSentences = []
+	for i in allSubjects:
+		allSentences += allSubjects[i]
 
 
+	# for training on pre-processed data
+	# variable "allSentences" here is in numeric format - different with the resulting from reading raw data above
+	wordSentences = []
+	for i in range(len(allSentences)):
+		wordSentences += [indexToWords(subject_vocab,allSentences[i])]
 
-    subjWE = wordEmbedding(wordSentences, subjVocab, 200, 50)
 
-    # create doc embedding for mail content
+
+	embedding, d, weights = wordEmbedding(wordSentences, subject_vocab, 200, 50)
+
+	# create doc embedding for mail content
 
 
 

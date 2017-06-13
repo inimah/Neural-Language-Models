@@ -107,7 +107,7 @@ def readTarDocs(filetar):
 	
 	return content
 
-def readZipDocs(filezip):
+def readZipDocs(fileZip):
 	with zipfile.ZipFile(fileZip) as z:
 		for filename in z.namelist():
 			if not filename.endswith('/'):

@@ -20,7 +20,7 @@ def wordEmbedding(documents, vocab, argsize, argiter):
     model = Word2Vec(documents, size=argsize, min_count=5, window=5, sg=1, iter=argiter)
     weights = model.wv.syn0
     d = dict([(k, v.index) for k, v in model.wv.vocab.items()])
-    embedding = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+    embedding = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
 
     for i, w in vocab.items():
 
@@ -28,9 +28,9 @@ def wordEmbedding(documents, vocab, argsize, argiter):
             continue
         embedding[i, :] = weights[d[w], :]
 
-    savePickle(embedding,'embedding')
+    #savePickle(embedding,'embedding')
     # alternative - saving as h5 file
-    saveH5File('embedding.h5','embedding',embedding)
+    #saveH5File('embedding.h5','embedding',embedding)
 
     return embedding, d, weights
 

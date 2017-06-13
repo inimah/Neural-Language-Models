@@ -26,6 +26,7 @@
 * conda install scipy
 * conda install scikit-learn
 * conda install h5py
+* pip install wget
 * conda install matplotlib
 * pip install -U nltk
 * python -m nltk.downloader -d /(your-home-directory)/nltk_data all
