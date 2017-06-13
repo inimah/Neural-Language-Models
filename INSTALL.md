@@ -1,4 +1,4 @@
-## if you are running experiments on GPU clusters, do not forget to check dependencies of the installed libraries with available cuda and gcc modules
+**If you are running experiments on GPU clusters, do not forget to check dependencies of the installed libraries with available cuda and gcc modules
 # activate modules 
 module load cuda/8.0.44
 module load cudnn/8.0-v5.1
