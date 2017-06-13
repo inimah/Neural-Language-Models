@@ -30,9 +30,11 @@
 * pip install -U nltk
 * python -m nltk.downloader -d /<your-home-directory>/nltk_data all
 * conda install gensim
+
 ** install seaborn (because I love their visualization) 
 ** this will also instantly install python pandas - or can also be installed prior with conda install pandas
-* cd <your-git-directory>
+
+* cd (<your-git-directory>)
 * git clone https://github.com/mwaskom/seaborn.git
 * cd seaborn
 * python setup.py install 
