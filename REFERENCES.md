@@ -2,6 +2,8 @@
 
 **References:**
 
+\[1]. Zhou, X., Wan, X., & Xiao, J. Attention-based LSTM Network for Cross-Lingual Sentiment Classification.
+
 # Cross-language embeddings
 
 **References:**
