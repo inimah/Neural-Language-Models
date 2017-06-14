@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 
 
-	embedding, d, weights = wordEmbedding(wordSentences, subject_vocab, 200, 50)
+	model, embedding, d, weights = wordEmbedding(wordSentences, subject_vocab, 200, 50)
 
 	# create doc embedding for mail content
 
