@@ -116,16 +116,7 @@ def wordEmbedding(documents, vocab, argsize, argiter):
 def docEmbedding(documents, vocab, argsize, argiter):
 
 
-    # labelling sentences with tag sent_id - since gensim doc2vec has different format of input as follows:
-    # sentences = [
-    #             TaggedDocument(words=[u're', u':', u'2', u'.', u'882', u's', u'-', u'>', u'np', u'np'], tags=['sent_0']),
-    #             TaggedDocument(words=[u'job', u'-', u'university', u'of', u'utah'], tags=['sent_1']),
-    #             ...
-    #             ]
-
-    # sentences here can also be considered as document
-    # for document with > 1 sentence, the input is the sequence of words in document
-    labelledSentences = createLabelledSentences(documents)
+    
     # doc2vec models
     doc2vec_models = [
     # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
@@ -140,9 +131,9 @@ def docEmbedding(documents, vocab, argsize, argiter):
     model2 = doc2vec_models[1]
     model3 = doc2vec_models[2]
 
-    model1.build_vocab(labelledSentences)
-    model2.build_vocab(labelledSentences)
-    model3.build_vocab(labelledSentences)
+    model1.build_vocab(documents)
+    model2.build_vocab(documents)
+    model3.build_vocab(documents)
 
 
     doc2vec_vocab1 = dict([(k, v.index) for k, v in model1.wv.vocab.items()])   
@@ -152,9 +143,9 @@ def docEmbedding(documents, vocab, argsize, argiter):
     print('Training doc2vec model...')
 
     for epoch in range(argiter):
-        model1.train(labelledSentences)
-        model2.train(labelledSentences)
-        model3.train(labelledSentences)
+        model1.train(documents)
+        model2.train(documents)
+        model3.train(documents)
 
 
     doc2vec_weights1 = model1.wv.syn0
@@ -201,6 +192,16 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
     
     return model1, model2, model3, embedding1, embedding2, embedding3
+
+
+def averageWE():
+
+    return 0
+
+
+def averageTfIdfWE():
+
+    return 0 
 
 
 def seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, embedding_dim, hidden_size, num_layers):

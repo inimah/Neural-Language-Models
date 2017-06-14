@@ -41,34 +41,45 @@ if __name__ == '__main__':
 	allSubjects = readPickle(os.path.join(LINGSPAM_PATH, 'allSubjects'))
 	allMails = readPickle(os.path.join(LINGSPAM_PATH,'allMails'))
 
-	# specifically for subject title part (short text)
-	# create WE version of subject
-	# first, put all subjects into one single document
+	## For mail subject (short text part of mail)
+	#######################################################
+	# create WE version of subject using gensim word2vec model
+	# put all subjects into one single document
+
+	# this sentence/document list is in numerical format
 
 	subjNumSentences = []
 	for i in allSubjects:
 		subjNumSentences += allSubjects[i]
 
 
-	# for training on pre-processed data
-	# variable "allSentences" here is in numeric format - different with the resulting from reading raw data above
+	# revert numerical format of sentence / document list into sequence of words format
+
 	subjSentences = []
 	for i in range(len(subjNumSentences)):
 		subjSentences += [indexToWords(subject_vocab,subjNumSentences[i])]
 
+	# word2vec model of mail subjects
+	model1, model2, embedding1, embedding2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
+
+	# doc2vec model of mail subject
 
 
-	model, embedding, d, weights = wordEmbedding(subjSentences, subject_vocab, 200, 50)
+	## For mail contents
+	#######################################################
 
-	# create doc embedding for mail content
+	# labelling sentences with tag sent_id - since gensim doc2vec has different format of input as follows:
+    # sentences = [
+    #             TaggedDocument(words=[u're', u':', u'2', u'.', u'882', u's', u'-', u'>', u'np', u'np'], tags=['sent_0']),
+    #             TaggedDocument(words=[u'job', u'-', u'university', u'of', u'utah'], tags=['sent_1']),
+    #             ...
+    #             ]
+
+    # sentences here can also be considered as document
+    # for document with > 1 sentence, the input is the sequence of words in document
+    labelledSentences = createLabelledSentences(subjSentences)
 
 
+    # doc2vec model
+    model1, model2, model3, embedding1, embedding2, embedding3 = docEmbedding(labelledSentences)
 
-
-#   splitting training, validation, test sets (in dictionary format)
-#	train, validate, test = splitDataDict(numericdict, train_percent=.6, validate_percent=.2, seed=None)
-	
-
-#	xTrain, yTrain = dictToArray(train)
-#	xValidate, yValidate = dictToArray(validate)
-#	xTest, yTest = dictToArray(test)
