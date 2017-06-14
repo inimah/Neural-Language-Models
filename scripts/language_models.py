@@ -60,18 +60,89 @@ def wordEmbedding(documents, vocab, argsize, argiter):
 
     return model, embedding, d, weights
 
-## to-be-added
+
 def docEmbedding(documents, vocab, argsize, argiter):
 
-    model = Doc2Vec(size=argsize, window=10, min_count=5, workers=10, alpha=0.025, min_alpha=0.025)
-    embedding = np.zeros(shape=(len(documents), argsize), dtype='float32')
-    
+
+    # labelling sentences with tag sent_id
+    # sentences here can also be considered as document
+    # for document with > 1 sentence, the input is the sequence of words in document
+    labelledSentences = createLabelledSentences(wordSentences)
+    # doc2vec models
+    doc2vec_models = [
+    # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
+    Doc2Vec(dm=1, dm_concat=1, size=argsize, window=5, negative=5, hs=1, min_count=0, alpha=0.025, min_alpha=0.025),
+    # PV-DBOW 
+    Doc2Vec(dm=0, size=argsize, negative=5, hs=1, min_count=0, alpha=0.025, min_alpha=0.025),
+    # PV-DM w/average
+    Doc2Vec(dm=1, dm_mean=1, size=argsize, window=5, negative=5, hs=1, min_count=0, alpha=0.025, min_alpha=0.025),
+    ]
+
+    model1 = doc2vec_models[0]
+    model2 = doc2vec_models[1]
+    model3 = doc2vec_models[2]
+
+    model1.build_vocab(labelledSentences)
+    model2.build_vocab(labelledSentences)
+    model3.build_vocab(labelledSentences)
+
+
+    doc2vec_vocab1 = dict([(k, v.index) for k, v in model1.wv.vocab.items()])   
+    doc2vec_vocab2 = dict([(k, v.index) for k, v in model2.wv.vocab.items()])
+    doc2vec_vocab3 = dict([(k, v.index) for k, v in model3.wv.vocab.items()])
+
+    print('Training doc2vec model...')
+
     for epoch in range(argiter):
-        model.train(documents)
-        model.alpha -= 0.002  # decrease the learning rate
-        model.min_alpha = model.alpha  # fix the learning rate, no decay
+        model1.train(labelledSentences)
+        model2.train(labelledSentences)
+        model3.train(labelledSentences)
+
+
+    doc2vec_weights1 = model1.wv.syn0
+    doc2vec_weights2 = model1.wv.syn0
+    doc2vec_weights3 = model1.wv.syn0
+
+    embedding1 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+    embedding2 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+    embedding3 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+
+    for i, w in vocab.items():
+
+        if w not in doc2vec_vocab1:
+            continue
+        embedding1[i, :] = doc2vec_weights1[doc2vec_vocab1[w], :]
+
+
+        if w not in doc2vec_vocab2:
+            continue
+        embedding2[i, :] = doc2vec_weights2[doc2vec_vocab2[w], :]
+
+        if w not in doc2vec_vocab3:
+            continue
+        embedding3[i, :] = doc2vec_weights3[doc2vec_vocab3[w], :]
     
-    return embedding
+
+
+    model1.save('doc2vec_model1')
+    model2.save('doc2vec_model2')
+    model3.save('doc2vec_model3')
+
+    savePickle(embedding1,'doc2vec_embedding1')
+    # alternative - saving as h5 file
+    saveH5File('doc2vec_embedding1.h5','embedding1',embedding1)
+
+    savePickle(embedding2,'doc2vec_embedding2')
+    # alternative - saving as h5 file
+    saveH5File('doc2vec_embedding2.h5','embedding2',embedding2)
+
+    savePickle(embedding3,'doc2vec_embedding3')
+    # alternative - saving as h5 file
+    saveH5File('doc2vec_embedding3.h5','embedding3',embedding3)
+
+
+    
+    return embedding1, embedding2, embedding3
 
 
 def seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, embedding_dim, hidden_size, num_layers):

@@ -45,20 +45,20 @@ if __name__ == '__main__':
 	# create WE version of subject
 	# first, put all subjects into one single document
 
-	allSentences = []
+	subjNumSentences = []
 	for i in allSubjects:
-		allSentences += allSubjects[i]
+		subjNumSentences += allSubjects[i]
 
 
 	# for training on pre-processed data
 	# variable "allSentences" here is in numeric format - different with the resulting from reading raw data above
-	wordSentences = []
-	for i in range(len(allSentences)):
-		wordSentences += [indexToWords(subject_vocab,allSentences[i])]
+	subjSentences = []
+	for i in range(len(subjNumSentences)):
+		subjSentences += [indexToWords(subject_vocab,subjNumSentences[i])]
 
 
 
-	model, embedding, d, weights = wordEmbedding(wordSentences, subject_vocab, 200, 50)
+	model, embedding, d, weights = wordEmbedding(subjSentences, subject_vocab, 200, 50)
 
 	# create doc embedding for mail content
 

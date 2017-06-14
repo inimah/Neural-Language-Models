@@ -27,6 +27,7 @@ import cPickle
 import h5py
 import collections
 from collections import defaultdict
+from collections import namedtuple
 import argparse
 import logging
 from gensim.models import Word2Vec
@@ -630,8 +631,19 @@ def getSentencesAll(datadict):
 	return sentences
 
 # for doc2vector input
-def createLabelledSentences():
-	return 0
+# creating list of sentences with tags
+def createLabelledSentences(wordSentences):
+
+	# labelled sentences with sent_id
+    labelledSentences = []
+    taggedDocument = namedtuple('labelledSentences', 'words tags')
+    for i,text in enumerate(wordSentences):
+        tag = ['sent_%s' %i]
+        labelledSentences.append(taggedDocument(text,tag))
+
+
+	return labelledSentences
+
 
 def printSentencesClass(classid, docid, sentid, sentences):
 	for i in range(len(sentences)):
@@ -851,3 +863,35 @@ def findWeights(folder):
 	modified_time = [os.path.getmtime(f) for f in findFile]
 	lastEpoch = findFile[np.argmax(modified_time)]
 	return lastEpoch
+
+
+class LabeledLineSentence(object):
+    def __init__(self, sources):
+        self.sources = sources
+        
+        flipped = {}
+        
+        # make sure that keys are unique
+        for key, value in sources.items():
+            if value not in flipped:
+                flipped[value] = [key]
+            else:
+                raise Exception('Non-unique prefix encountered')
+    
+    def __iter__(self):
+        for source, prefix in self.sources.items():
+            with utils.smart_open(source) as fin:
+                for item_no, line in enumerate(fin):
+                    yield LabeledSentence(utils.to_unicode(line).split(), [prefix + '_%s' % item_no])
+    
+    def to_array(self):
+        self.sentences = []
+        for source, prefix in self.sources.items():
+            with utils.smart_open(source) as fin:
+                for item_no, line in enumerate(fin):
+                    self.sentences.append(LabeledSentence(utils.to_unicode(line).split(), [prefix + '_%s' % item_no]))
+        return self.sentences
+    
+    def sentences_perm(self):
+        shuffle(self.sentences)
+        return self.sentences
