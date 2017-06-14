@@ -18,7 +18,7 @@ from text_preprocessing import *
 def wordEmbedding(documents, vocab, argsize, argiter):
 
     
-    print('Training word2vec model...')
+    # description of parameters in gensim word2vec model
 
     #`sg` defines the training algorithm. By default (`sg=0`), CBOW is used. Otherwise (`sg=1`), skip-gram is employed.
     #`min_count` = ignore all words with total frequency lower than this
@@ -30,44 +30,102 @@ def wordEmbedding(documents, vocab, argsize, argiter):
     # Default is 5. If set to 0, no negative samping is used.
     
 
-    model = Word2Vec(documents, size=argsize, min_count=0, window=5, sg=1, hs=1, negative=5, iter=argiter)
-    weights = model.wv.syn0
-    word2vec_vocab = dict([(k, v.index) for k, v in model.wv.vocab.items()])
-    embedding = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+    word2vec_models = [
+    # skipgram model with hierarchical softmax and negative sampling
+    Word2Vec(size=argsize, min_count=0, window=5, sg=1, hs=1, negative=5, iter=argiter),
+    # cbow model with hierarchical softmax and negative sampling
+    Word2Vec(size=argsize, min_count=0, window=5, sg=0, hs=1, negative=5, iter=argiter)
+
+    ]
+
+    model1 = word2vec_models[0]
+    model2 = word2vec_models[1]
+ 
+
+    # building vocab for each model (creating 2, in case one model subsampling word vocabulary differently)
+    model1.build_vocab(documents)
+    model2.build_vocab(documents)
+
+    word2vec_vocab1 = dict([(k, v.index) for k, v in model1.wv.vocab.items()])   
+    word2vec_vocab2 = dict([(k, v.index) for k, v in model2.wv.vocab.items()])
+
+    embedding1 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+    embedding2 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+
+
+
+    print('Training word2vec model...')
+
+    for epoch in range(argiter):
+        model1.train(documents)
+        model2.train(documents)
+
+
+    word2vec_weights1 = model1.wv.syn0
+    word2vec_weights2 = model2.wv.syn0
+   
+    
 
     for i, w in vocab.items():
 
-        if w not in word2vec_vocab:
+        if w not in word2vec_vocab1:
             continue
-        embedding[i, :] = weights[word2vec_vocab[w], :]
+        embedding1[i, :] = word2vec_weights1[word2vec_vocab1[w], :]
 
-    savePickle(embedding,'embedding')
+        if w not in word2vec_vocab2:
+            continue
+        embedding2[i, :] = word2vec_weights2[word2vec_vocab2[w], :]
+
+
+
+    savePickle(embedding1,'embedding1')
     # alternative - saving as h5 file
-    saveH5File('embedding.h5','embedding',embedding)
+    saveH5File('embedding1.h5','embedding1',embedding1)
 
-    # also save model
-    model.save('word2vec_model')
-    savePickle(model,'model_pickle')
+    savePickle(embedding2,'embedding2')
+    # alternative - saving as h5 file
+    saveH5File('embedding2.h5','embedding2',embedding2)
 
-    # also vocab and weights from word2vec
-    savePickle(word2vec_vocab,'word2vec_vocab')
-    saveH5Dict('word2vec_vocab.h5',word2vec_vocab)
+    # save model
+    model1.save('word2vec_model1')
+    savePickle(model1,'model1_pickle')
 
-    savePickle(weights,'word2vec_weights')
-    saveH5File('word2vec_weights.h5','word2vec_weights',weights)
+    model2.save('word2vec_model2')
+    savePickle(model2,'model2_pickle')
+
+    # save vocab built from word2vec model
+    savePickle(word2vec_vocab1,'word2vec_vocab1')
+    saveH5Dict('word2vec_vocab1.h5',word2vec_vocab1)
+
+    savePickle(word2vec_vocab2,'word2vec_vocab2')
+    saveH5Dict('word2vec_vocab2.h5',word2vec_vocab2)
+
+
+    # save original weights from word2vec model 
+    savePickle(word2vec_weights1,'word2vec_weights1')
+    saveH5File('word2vec_weights1.h5','word2vec_weights1',word2vec_weights1)
+
+    savePickle(word2vec_weights2,'word2vec_weights2')
+    saveH5File('word2vec_weights2.h5','word2vec_weights2',word2vec_weights2)
 
 
 
-    return model, embedding, d, weights
+    return model1, model2, embedding1, embedding2
 
 
 def docEmbedding(documents, vocab, argsize, argiter):
 
 
-    # labelling sentences with tag sent_id
+    # labelling sentences with tag sent_id - since gensim doc2vec has different format of input as follows:
+    # sentences = [
+    #             TaggedDocument(words=[u're', u':', u'2', u'.', u'882', u's', u'-', u'>', u'np', u'np'], tags=['sent_0']),
+    #             TaggedDocument(words=[u'job', u'-', u'university', u'of', u'utah'], tags=['sent_1']),
+    #             ...
+    #             ]
+
     # sentences here can also be considered as document
     # for document with > 1 sentence, the input is the sequence of words in document
-    labelledSentences = createLabelledSentences(wordSentences)
+    labelledSentences = createLabelledSentences(documents)
     # doc2vec models
     doc2vec_models = [
     # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
@@ -100,8 +158,8 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
 
     doc2vec_weights1 = model1.wv.syn0
-    doc2vec_weights2 = model1.wv.syn0
-    doc2vec_weights3 = model1.wv.syn0
+    doc2vec_weights2 = model2.wv.syn0
+    doc2vec_weights3 = model3.wv.syn0
 
     embedding1 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
     embedding2 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
@@ -142,7 +200,7 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
 
     
-    return embedding1, embedding2, embedding3
+    return model1, model2, model3, embedding1, embedding2, embedding3
 
 
 def seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, embedding_dim, hidden_size, num_layers):
