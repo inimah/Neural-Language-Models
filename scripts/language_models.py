@@ -32,18 +32,31 @@ def wordEmbedding(documents, vocab, argsize, argiter):
 
     model = Word2Vec(documents, size=argsize, min_count=0, window=5, sg=1, hs=1, negative=5, iter=argiter)
     weights = model.wv.syn0
-    d = dict([(k, v.index) for k, v in model.wv.vocab.items()])
-    embedding = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
+    word2vec_vocab = dict([(k, v.index) for k, v in model.wv.vocab.items()])
+    embedding = np.zeros(shape=(len(vocab), argsize), dtype='float32')
 
     for i, w in vocab.items():
 
-        if w not in d:
+        if w not in word2vec_vocab:
             continue
-        embedding[i, :] = weights[d[w], :]
+        embedding[i, :] = weights[word2vec_vocab[w], :]
 
-    #savePickle(embedding,'embedding')
+    savePickle(embedding,'embedding')
     # alternative - saving as h5 file
-    #saveH5File('embedding.h5','embedding',embedding)
+    saveH5File('embedding.h5','embedding',embedding)
+
+    # also save model
+    model.save('word2vec_model')
+    savePickle(model,'model_pickle')
+
+    # also vocab and weights from word2vec
+    savePickle(word2vec_vocab,'word2vec_vocab')
+    saveH5Dict('word2vec_vocab.h5',word2vec_vocab)
+
+    savePickle(weights,'word2vec_weights')
+    saveH5File('word2vec_weights.h5','word2vec_weights',weights)
+
+
 
     return model, embedding, d, weights
 
