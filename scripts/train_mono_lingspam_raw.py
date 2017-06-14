@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #__author__ = "@tita"
 #__date__ = "20.05.2017"
-#__version__ = "1.0.1"
+#__update__ = "14.06.2017"
 #__maintainer__ = "@tita"
 #__email__ = "i.nimah@tue.nl"
 
@@ -30,7 +30,7 @@ NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
-LINGSPAM_PATH = 'data/lingspam'
+LINGSPAM_PATH = '../../experiments/data/enron/maildata/lingspam'
 
 
 if __name__ == '__main__':
@@ -41,6 +41,8 @@ if __name__ == '__main__':
 
 	# return tokenized subject and mail content 
 	subjVocab, contVocab, subjAllTokens, contentAllTokens, allSubj, allCont = generateLingSpam(datadict)
+
+	'''
 
 	# specifically for the content of mail
 	# return splitted sentences in a form of tokenized words 
@@ -74,7 +76,7 @@ if __name__ == '__main__':
 
     # create doc embedding for mail content
 
-
+    '''
 
 
 #   splitting training, validation, test sets (in dictionary format)

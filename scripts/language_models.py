@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #__author__ = "@tita"
-#__update__ = "06.06.2017"
+#__update__ = "14.06.2017"
 #__maintainer__ = "@tita"
 #__email__ = "i.nimah@tue.nl"
 
@@ -17,32 +17,20 @@ from text_preprocessing import *
 
 def wordEmbedding(documents, vocab, argsize, argiter):
 
-
-    # Set parameters
-    word_dimension = argsize  # Word vector dimensionality
-    min_word_count = 0  
-    context = 5  # Context window size
-    downsampling = 1e-3  # Downsample setting for frequent words
-
-
-
+    
     print('Training word2vec model...')
+
     #`sg` defines the training algorithm. By default (`sg=0`), CBOW is used. Otherwise (`sg=1`), skip-gram is employed.
-
     #`min_count` = ignore all words with total frequency lower than this
-
     #`max_vocab_size` = limit RAM during vocabulary building; if there are more unique words than this, then prune the infrequent ones. Every 10 million word types
     # need about 1GB of RAM. Set to `None` for no limit (default).
-
     #`workers` = use this many worker threads to train the model (=faster training with multicore machines).
-
     #`hs` = if 1, hierarchical softmax will be used for model training. If set to 0 (default), and `negative` is non-zero, negative sampling will be used.
-
     #`negative` = if > 0, negative sampling will be used, the int for negative specifies how many "noise words" should be drawn (usually between 5-20).
     # Default is 5. If set to 0, no negative samping is used.
     
 
-    model = Word2Vec(documents, size=argsize, min_count=min_word_count, window=context, sg=1, hs=1, negative=5, iter=argiter)
+    model = Word2Vec(documents, size=argsize, min_count=0, window=5, sg=1, hs=1, negative=5, iter=argiter)
     weights = model.wv.syn0
     d = dict([(k, v.index) for k, v in model.wv.vocab.items()])
     embedding = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')

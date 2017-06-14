@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #__author__ = "@tita"
-#__date__ = "06.05.2017"
+#__date__ = "20.05.2017"
+#__update__ = "06.05.2017"
 #__version__ = "1.0.1"
 #__maintainer__ = "@tita"
 #__email__ = "i.nimah@tue.nl"
@@ -328,7 +329,7 @@ def generateLingSpam(datadictionary):
 	cont = dict()
 
 	allSubj = dict()
-	allMail = dict()
+	allCont = dict()
 	
 
 	for k in datadictionary:
@@ -381,7 +382,7 @@ def generateLingSpam(datadictionary):
 	contFreq = nltk.FreqDist(itertools.chain(*contentAllTokens)) 
 	contUnique = contFreq.keys()
 	# add 'zero' as the first vocab and 'UNK' as unknown words
-	contUnique.insert(0,'zero')
+	contUnique.insert(0,'zerostart')
 	contUnique.append('UNK')
 	# indexing word vocabulary : pairs of (index,word)
 	contVocab=dict([(i,contUnique[i]) for i in range(len(contUnique))])
