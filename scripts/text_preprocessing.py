@@ -644,6 +644,20 @@ def createLabelledSentences(wordSentences):
 
 	return labelledSentences
 
+# transform / join comma separated word sequence to a single string of sentence
+# e.g. as input of sklearn TfIdfVectorized  
+def sequenceToStr(wordSentences):
+	strSentences = []
+	for i,text in enumerate(wordSentences):
+
+		# clean text from utf8 character 'u'
+		cleanTxt = convert(text)
+		sent = ' '.join(cleanTxt)
+		strSentences.append(sent)
+
+	return strSentences
+	
+
 
 def printSentencesClass(classid, docid, sentid, sentences):
 	for i in range(len(sentences)):

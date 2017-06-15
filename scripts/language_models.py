@@ -9,12 +9,14 @@ import os
 import sys
 import numpy as np
 from gensim.models import Word2Vec, Doc2Vec
+from sklearn.feature_extraction.text import TfidfVectorizer
 from keras.models import Sequential
 from keras.layers import *
 from keras.preprocessing import sequence
 from text_preprocessing import *
 
 
+# word2vec models
 def wordEmbedding(documents, vocab, argsize, argiter):
 
     
@@ -38,7 +40,9 @@ def wordEmbedding(documents, vocab, argsize, argiter):
 
     ]
 
+    # model 1 = skipgram 
     model1 = word2vec_models[0]
+    # model 2 = cbow
     model2 = word2vec_models[1]
  
 
@@ -113,6 +117,7 @@ def wordEmbedding(documents, vocab, argsize, argiter):
     return model1, model2, embedding1, embedding2
 
 
+# doc2vec models
 def docEmbedding(documents, vocab, argsize, argiter):
 
 
@@ -194,14 +199,59 @@ def docEmbedding(documents, vocab, argsize, argiter):
     return model1, model2, model3, embedding1, embedding2, embedding3
 
 
-def averageWE():
+# generating sentence-level / document embedding by averaging word2vec
+# document here is sentence - or sequence of words
+def averageWE(word2vec_model, documents):
 
-    return 0
+    w2v_vocab = word2vec_model.wv.index2word
+    w2v_weights = word2vec_model.wv.syn0
+    w2v = dict(zip(w2v_vocab, w2v_weights))
+    dim = len(w2v.itervalues().next())
+    
+    return np.array([
+        np.mean([w2v[w] for w in documents if w in w2v]
+            or [np.zeros(dim)], axis=0)
+        ])
 
 
-def averageTfIdfWE():
+# generating sentence-level / document embedding by averaging word2vec and Tf-Idf penalty
+# document here is sentence - or sequence of words
+def averageIdfWE(word2vec_model, documents):
 
-    return 0 
+    w2v_vocab = word2vec_model.wv.index2word
+    w2v_weights = word2vec_model.wv.syn0
+    w2v = dict(zip(w2v_vocab, w2v_weights))
+    dim = len(w2v.itervalues().next())
+
+    # calculating Tf-Idf weights
+    weight = None
+    # transforming tokenized documents into string format - following input format of TfidfVectorizer
+    strSentences = sequenceToStr(documents)
+    #tfidf = TfidfVectorizer(analyzer="word", stop_words=None)
+    tfidf = TfidfVectorizer(use_idf=True, smooth_idf= True, norm=None, stop_words=None)
+
+    tfidf_matrix = tfidf.fit_transform(strSentences)
+    # the resulting normalized document term matrix 
+    arrTfIdf = tfidf_matrix.todense()
+
+    # sklearn library use the following formula of idf
+    # idf(term) = ( log ((1 + nd)/(1 + df(doc,term))) ) + 1
+    # where nd : number of document in corpus; df : doc frequency (number of documents containing term)
+
+    idf = tfidf.idf_ 
+    wordIdf = dict(zip(tfidf.get_feature_names(), idf))
+
+    # if a word was never seen - it must be at least as infrequent
+    # as any of the known words - so the default idf is the max of 
+    # known idf's
+    max_idf = max(tfidf.idf_)
+    #weight = defaultdict(lambda: max_idf, [(w, tfidf.idf_[i]) for w, i in tfidf.vocabulary_.items()])
+
+    return np.array([
+        np.mean([w2v[w] * wordIdf[w] 
+            for w in documents if w in w2v] or 
+            [np.zeros(dim)], axis=0)
+        ]) 
 
 
 def seqEncoderDecoder(X_vocab_len, X_max_len, y_vocab_len, y_max_len, embedding_dim, hidden_size, num_layers):

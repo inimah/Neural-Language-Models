@@ -62,12 +62,16 @@ if __name__ == '__main__':
 	# word2vec model of mail subjects
 	model1, model2, embedding1, embedding2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
 
+
+	# create document representation of word vectors
+
+	# By averaging word vectors
+
+	
+
+	# By averaging Tf-Idf of word vectors 
+
 	# doc2vec model of mail subject
-
-
-	## For mail contents
-	#######################################################
-
 	# labelling sentences with tag sent_id - since gensim doc2vec has different format of input as follows:
     # sentences = [
     #             TaggedDocument(words=[u're', u':', u'2', u'.', u'882', u's', u'-', u'>', u'np', u'np'], tags=['sent_0']),
@@ -82,4 +86,10 @@ if __name__ == '__main__':
 
     # doc2vec model
     model1, model2, model3, embedding1, embedding2, embedding3 = docEmbedding(labelledSentences)
+
+
+	## For mail contents
+	#######################################################
+
+
 
