@@ -191,7 +191,7 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
     
     return model1, model2, model3, embedding1, embedding2, embedding3
-    
+
 
 ################################################
 # generating sentence-level / document embedding by averaging word2vec
@@ -241,8 +241,7 @@ def averageIdfWE(word2vec_model, documents):
     # if a word was never seen - it must be at least as infrequent
     # as any of the known words - so the default idf is the max of 
     # known idf's
-    max_idf = max(tfidf.idf_)
-    #weight = defaultdict(lambda: max_idf, [(w, tfidf.idf_[i]) for w, i in tfidf.vocabulary_.items()])
+    # max_idf = max(tfidf.idf_)
 
     return np.array([
         np.mean([w2v[w] * wordIdf[w] 
