@@ -15,8 +15,9 @@ from keras.layers import *
 from keras.preprocessing import sequence
 from text_preprocessing import *
 
-
+################################################
 # word2vec models
+################################################
 def wordEmbedding(documents, vocab, argsize, argiter):
 
     
@@ -56,19 +57,14 @@ def wordEmbedding(documents, vocab, argsize, argiter):
     embedding1 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
     embedding2 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
 
-
-
     print('Training word2vec model...')
 
     for epoch in range(argiter):
         model1.train(documents)
         model2.train(documents)
 
-
     word2vec_weights1 = model1.wv.syn0
-    word2vec_weights2 = model2.wv.syn0
-   
-    
+    word2vec_weights2 = model2.wv.syn0    
 
     for i, w in vocab.items():
 
@@ -79,8 +75,6 @@ def wordEmbedding(documents, vocab, argsize, argiter):
         if w not in word2vec_vocab2:
             continue
         embedding2[i, :] = word2vec_weights2[word2vec_vocab2[w], :]
-
-
 
     savePickle(embedding1,'embedding1')
     # alternative - saving as h5 file
@@ -113,11 +107,11 @@ def wordEmbedding(documents, vocab, argsize, argiter):
     saveH5File('word2vec_weights2.h5','word2vec_weights2',word2vec_weights2)
 
 
-
     return model1, model2, embedding1, embedding2
 
-
+################################################
 # doc2vec models
+################################################
 def docEmbedding(documents, vocab, argsize, argiter):
 
 
@@ -197,10 +191,12 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
     
     return model1, model2, model3, embedding1, embedding2, embedding3
+    
 
-
+################################################
 # generating sentence-level / document embedding by averaging word2vec
 # document here is sentence - or sequence of words
+################################################
 def averageWE(word2vec_model, documents):
 
     w2v_vocab = word2vec_model.wv.index2word
@@ -213,9 +209,10 @@ def averageWE(word2vec_model, documents):
             or [np.zeros(dim)], axis=0)
         ])
 
-
+################################################
 # generating sentence-level / document embedding by averaging word2vec and Tf-Idf penalty
 # document here is sentence - or sequence of words
+################################################
 def averageIdfWE(word2vec_model, documents):
 
     w2v_vocab = word2vec_model.wv.index2word
