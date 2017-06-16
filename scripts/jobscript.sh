@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name="lm_tita"
-#SBATCH -N 10          
+#SBATCH -N 2          
 #SBATCH -p gpu        
 #SBATCH -t 5-00:00:00  
 #SBATCH -o output.out
