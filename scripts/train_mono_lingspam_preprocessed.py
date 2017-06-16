@@ -102,7 +102,7 @@ if __name__ == '__main__':
 	labelledSentences = createLabelledSentences(subjSentences)
 
 	# doc2vec model
-	d2v_model1, d2v_model2, d2v_model3, d2v_embedding1, d2v_embedding2, d2v_embedding3 = docEmbedding(labelledSentences)
+	d2v_model1, d2v_model2, d2v_model3, d2v_embedding1, d2v_embedding2, d2v_embedding3 = docEmbedding(labelledSentences, subject_vocab, 200, 50)
 
 
 	## For mail contents
