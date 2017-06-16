@@ -219,8 +219,8 @@ def averageWE(word2vec_model, documents):
 
 	doc_embedding = []
 
-	for i,text in enumerate(strSentences):
-		embedding = np.mean([w2v[w] for w in documents if w in w2v]
+	for i,text in enumerate(documents):
+		embedding = np.mean([w2v[w] for w in text if w in w2v]
 			or [np.zeros(dim)], axis=0)
 		
 		doc_embedding.append(embedding)
