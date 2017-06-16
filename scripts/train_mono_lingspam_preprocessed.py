@@ -52,7 +52,6 @@ if __name__ == '__main__':
 	for i in allSubjects:
 		subjNumSentences += allSubjects[i]
 
-
 	# revert numerical format of sentence / document list into sequence of words format
 
 	subjSentences = []
@@ -60,22 +59,41 @@ if __name__ == '__main__':
 		subjSentences += [indexToWords(subject_vocab,subjNumSentences[i])]
 
 	# word2vec model of mail subjects
-	model1, model2, embedding1, embedding2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
-
+	w2v_model1, w2v_model2, w2v_embedding1, w2v_embedding2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
 
 	# create document representation of word vectors
 
 	# By averaging word vectors
+	avg_embedding1 = averageWE(w2v_model1, subjSentences)
+	avg_embedding2 = averageWE(w2v_model2, subjSentences)
 
-	
+	savePickle(avg_embedding1,'avg_embedding1')
+    # alternative - saving as h5 file
+    saveH5File('avg_embedding1.h5','avg_embedding1',avg_embedding1)
 
-	# By averaging Tf-Idf of word vectors 
+    savePickle(avg_embedding2,'avg_embedding2')
+    # alternative - saving as h5 file
+    saveH5File('avg_embedding2.h5','avg_embedding2',avg_embedding2)
+
+
+	# By averaging and idf weights of word vectors
+	avgIDF_embedding1 = averageIdfWE(w2v_model1, subjSentences)
+	avgIDF_embedding2 = averageIdfWE(w2v_model2, subjSentences)
+
+	savePickle(avgIDF_embedding1,'avgIDF_embedding1')
+    # alternative - saving as h5 file
+    saveH5File('avgIDF_embedding1.h5','avgIDF_embedding1',avgIDF_embedding1)
+
+    savePickle(avgIDF_embedding2,'avgIDF_embedding2')
+    # alternative - saving as h5 file
+    saveH5File('avgIDF_embedding2.h5','avgIDF_embedding2',avgIDF_embedding2)
+
 
 	# doc2vec model of mail subject
 	# labelling sentences with tag sent_id - since gensim doc2vec has different format of input as follows:
     # sentences = [
-    #             TaggedDocument(words=[u're', u':', u'2', u'.', u'882', u's', u'-', u'>', u'np', u'np'], tags=['sent_0']),
-    #             TaggedDocument(words=[u'job', u'-', u'university', u'of', u'utah'], tags=['sent_1']),
+    #             labelledSentences(words=[u're', u':', u'2', u'.', u'882', u's', u'-', u'>', u'np', u'np'], tags=['sent_0']),
+    #             labelledSentences(words=[u'job', u'-', u'university', u'of', u'utah'], tags=['sent_1']),
     #             ...
     #             ]
 
@@ -83,9 +101,8 @@ if __name__ == '__main__':
     # for document with > 1 sentence, the input is the sequence of words in document
     labelledSentences = createLabelledSentences(subjSentences)
 
-
     # doc2vec model
-    model1, model2, model3, embedding1, embedding2, embedding3 = docEmbedding(labelledSentences)
+    d2v_model1, d2v_model2, d2v_model3, d2v_embedding1, d2v_embedding2, d2v_embedding3 = docEmbedding(labelledSentences)
 
 
 	## For mail contents

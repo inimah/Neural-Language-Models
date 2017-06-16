@@ -89,20 +89,20 @@ def wordEmbedding(documents, vocab, argsize, argiter):
             continue
         embedding2[i, :] = word2vec_weights2[word2vec_vocab2[w], :]
 
-    savePickle(embedding1,'embedding1')
+    savePickle(embedding1,'w2v_embedding1')
     # alternative - saving as h5 file
-    saveH5File('embedding1.h5','embedding1',embedding1)
+    saveH5File('w2v_embedding1.h5','w2v_embedding1',embedding1)
 
-    savePickle(embedding2,'embedding2')
+    savePickle(embedding2,'w2v_embedding2')
     # alternative - saving as h5 file
-    saveH5File('embedding2.h5','embedding2',embedding2)
+    saveH5File('w2v_embedding2.h5','w2v_embedding2',embedding2)
 
     # save model
     model1.save('word2vec_model1')
-    savePickle(model1,'model1_pickle')
+    savePickle(model1,'w2v_model1_pickle')
 
     model2.save('word2vec_model2')
-    savePickle(model2,'model2_pickle')
+    savePickle(model2,'w2v_model2_pickle')
 
     # save vocab built from word2vec model
     savePickle(word2vec_vocab1,'word2vec_vocab1')
@@ -191,15 +191,15 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
     savePickle(embedding1,'doc2vec_embedding1')
     # alternative - saving as h5 file
-    saveH5File('doc2vec_embedding1.h5','embedding1',embedding1)
+    saveH5File('doc2vec_embedding1.h5','doc2vec_embedding1',embedding1)
 
     savePickle(embedding2,'doc2vec_embedding2')
     # alternative - saving as h5 file
-    saveH5File('doc2vec_embedding2.h5','embedding2',embedding2)
+    saveH5File('doc2vec_embedding2.h5','doc2vec_embedding2',embedding2)
 
     savePickle(embedding3,'doc2vec_embedding3')
     # alternative - saving as h5 file
-    saveH5File('doc2vec_embedding3.h5','embedding3',embedding3)
+    saveH5File('doc2vec_embedding3.h5','doc2vec_embedding3',embedding3)
 
 
     
