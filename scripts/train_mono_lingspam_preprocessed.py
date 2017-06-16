@@ -69,11 +69,11 @@ if __name__ == '__main__':
 
 	savePickle(avg_embedding1,'avg_embedding1')
 	# alternative - saving as h5 file
-	saveH5File('avg_embedding1.h5','avg_embedding1',avg_embedding1)
+	saveH5File('avg_embedding1.hdf5','avg_embedding1',avg_embedding1)
 
 	savePickle(avg_embedding2,'avg_embedding2')
 	# alternative - saving as h5 file
-	saveH5File('avg_embedding2.h5','avg_embedding2',avg_embedding2)
+	saveH5File('avg_embedding2.hdf5','avg_embedding2',avg_embedding2)
 
 
 	# By averaging and idf weights of word vectors
@@ -82,11 +82,11 @@ if __name__ == '__main__':
 
 	savePickle(avgIDF_embedding1,'avgIDF_embedding1')
 	# alternative - saving as h5 file
-	saveH5File('avgIDF_embedding1.h5','avgIDF_embedding1',avgIDF_embedding1)
+	saveH5File('avgIDF_embedding1.hdf5','avgIDF_embedding1',avgIDF_embedding1)
 
 	savePickle(avgIDF_embedding2,'avgIDF_embedding2')
 	# alternative - saving as h5 file
-	saveH5File('avgIDF_embedding2.h5','avgIDF_embedding2',avgIDF_embedding2)
+	saveH5File('avgIDF_embedding2.hdf5','avgIDF_embedding2',avgIDF_embedding2)
 
 
 	# doc2vec model of mail subject

@@ -91,11 +91,11 @@ def wordEmbedding(documents, vocab, argsize, argiter):
 
 	savePickle(embedding1,'w2v_embedding1')
 	# alternative - saving as h5 file
-	saveH5File('w2v_embedding1.h5','w2v_embedding1',embedding1)
+	saveH5File('w2v_embedding1.hdf5','w2v_embedding1',embedding1)
 
 	savePickle(embedding2,'w2v_embedding2')
 	# alternative - saving as h5 file
-	saveH5File('w2v_embedding2.h5','w2v_embedding2',embedding2)
+	saveH5File('w2v_embedding2.hdf5','w2v_embedding2',embedding2)
 
 	# save model
 	model1.save('word2vec_model1')
@@ -106,18 +106,18 @@ def wordEmbedding(documents, vocab, argsize, argiter):
 
 	# save vocab built from word2vec model
 	savePickle(word2vec_vocab1,'word2vec_vocab1')
-	saveH5Dict('word2vec_vocab1.h5',word2vec_vocab1)
+	saveH5Dict('word2vec_vocab1.hdf5',word2vec_vocab1)
 
 	savePickle(word2vec_vocab2,'word2vec_vocab2')
-	saveH5Dict('word2vec_vocab2.h5',word2vec_vocab2)
+	saveH5Dict('word2vec_vocab2.hdf5',word2vec_vocab2)
 
 
 	# save original weights from word2vec model 
 	savePickle(word2vec_weights1,'word2vec_weights1')
-	saveH5File('word2vec_weights1.h5','word2vec_weights1',word2vec_weights1)
+	saveH5File('word2vec_weights1.hdf5','word2vec_weights1',word2vec_weights1)
 
 	savePickle(word2vec_weights2,'word2vec_weights2')
-	saveH5File('word2vec_weights2.h5','word2vec_weights2',word2vec_weights2)
+	saveH5File('word2vec_weights2.hdf5','word2vec_weights2',word2vec_weights2)
 
 
 	return model1, model2, embedding1, embedding2
@@ -191,15 +191,15 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
 	savePickle(embedding1,'doc2vec_embedding1')
 	# alternative - saving as h5 file
-	saveH5File('doc2vec_embedding1.h5','doc2vec_embedding1',embedding1)
+	saveH5File('doc2vec_embedding1.hdf5','doc2vec_embedding1',embedding1)
 
 	savePickle(embedding2,'doc2vec_embedding2')
 	# alternative - saving as h5 file
-	saveH5File('doc2vec_embedding2.h5','doc2vec_embedding2',embedding2)
+	saveH5File('doc2vec_embedding2.hdf5','doc2vec_embedding2',embedding2)
 
 	savePickle(embedding3,'doc2vec_embedding3')
 	# alternative - saving as h5 file
-	saveH5File('doc2vec_embedding3.h5','doc2vec_embedding3',embedding3)
+	saveH5File('doc2vec_embedding3.hdf5','doc2vec_embedding3',embedding3)
 
 
 	
