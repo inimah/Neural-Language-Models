@@ -10,6 +10,7 @@ import sys
 import numpy as np
 from text_preprocessing import *
 from language_models import *
+from clustering import *
 
 import argparse
 
@@ -48,8 +49,12 @@ if __name__ == '__main__':
 
 	# this sentence/document list is in numerical format
 
+	classLabel=[]
 	subjNumSentences = []
 	for i in allSubjects:
+		nclass = len(allSubjects[i])
+		for _j in range(nclass):
+			classLabel.append(i)
 		subjNumSentences += allSubjects[i]
 
 	# revert numerical format of sentence / document list into sequence of words format
@@ -104,6 +109,7 @@ if __name__ == '__main__':
 	# doc2vec model
 	d2v_model1, d2v_model2, d2v_model3, d2v_embedding1, d2v_embedding2, d2v_embedding3 = docEmbedding(labelledSentences, subject_vocab, 200, 50)
 
+	
 
 	## For mail contents
 	#######################################################

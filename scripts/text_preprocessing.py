@@ -756,8 +756,21 @@ def stringToNominalClass(datadict):
 		i +=1
 	return numericdict 
 
+
+#
+def dictToArray(datadict):
+
+	list1 = []
+	for key in datadict:
+		list1.append(datadict[key])
+
+	npArr = np.array(list1)
+	return npArr
+
+
 # return dictionary to nested array
-def dictToArray(numericdict):
+# this is for datadictionary (sequence of words and sentences in document corpus)
+def docDictToArray(numericdict):
 	list1 = []
 	for key in numericdict:
 		list2 = []
@@ -770,7 +783,8 @@ def dictToArray(numericdict):
 
 # data dictionary here is in nominal class label format
 # the resulting array is a mixed class label data sets
-def dictMrgArray(numericdict):
+# this is for datadictionary (sequence of words and sentences in document corpus)
+def docDictMrgArray(numericdict):
 	xlist = []
 	ylist = []
 	for key in numericdict:

@@ -46,6 +46,7 @@
 * git clone https://github.com/fchollet/keras.git
 * cd keras
 * python setup.py install 
+pip install git+git://github.com/fchollet/keras.git --upgrade
 
 
 ## Test Installation
@@ -62,3 +63,5 @@ session.close()
 
 ## deactivate/quit conda tensorflow environment
 source deactivate tfenv
+
+
