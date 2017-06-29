@@ -89,6 +89,12 @@ def getClassLabel(filenames):
 
 	return datadict
 
+
+# reading data from csv / structured format 
+def extractData(fileDat):   
+   dat = pd.read_table(fileDat,sep=',',index_col=None,header=0,error_bad_lines=False,dtype = unicode)
+   return data
+
 # reading each text document
 ################################################
 def readDocs(filename):
@@ -216,6 +222,7 @@ def generatePairset(datadictionary):
 			docs.append(readDocs(filename))
 		for doc in docs:
 			# tokenize, but preserve punctuations,n-grams, currency, percentage
+			doc = doc.lower()
 			docwords.append(nltk.word_tokenize(doc.decode('utf-8','ignore')))
 
 		# encoding unicode data back to string
@@ -284,6 +291,7 @@ def generateTrainset(datadictionary):
 			docs.append(readDocs(filename))
 		for doc in docs:
 			# tokenize, but preserve punctuations,n-grams, currency, percentage
+			doc = doc.lower()
 			docwords.append(nltk.word_tokenize(doc.decode('utf-8','ignore')))
 
 		# encoding unicode data back to string
@@ -350,7 +358,7 @@ def generateLingSpam(datadictionary):
 						# tokenize
 						subjTitle = nltk.word_tokenize(afterKey.decode('utf-8','ignore'))
 					else:
-						tmpCont = line
+						tmpCont = line.lower()
 						# get tokenized content
 						contWords = nltk.word_tokenize(tmpCont.decode('utf-8','ignore')) 
 
@@ -533,7 +541,7 @@ def getSentencesClassNum(datadict):
 	for key in datadict:
 		tmp = []
 		for i in range(len(datadict[key])):
-			tmp.append(splitSentences(datadict[key][i]))
+			tmp=(splitSentences(datadict[key][i]))
 		sentences.append(tmp)
 	return sentences
 

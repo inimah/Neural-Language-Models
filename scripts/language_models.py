@@ -11,7 +11,7 @@ import numpy as np
 import nltk
 from gensim.models import Word2Vec, Doc2Vec
 from sklearn.feature_extraction.text import TfidfVectorizer
-from keras.models import Sequential, Model, Graph
+from keras.models import Sequential, Model
 from keras.layers import *
 from keras.preprocessing import sequence
 from text_preprocessing import *
@@ -293,7 +293,31 @@ def seqEncDec(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM, emb
 	
 	model.add(Embedding(X_vocab_len+1, EMBEDDING_DIM, input_length=X_max_len, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
 	# Creating encoder network
-	model.add(LSTM(hidden_size,name='lstm_1'))
+	model.add(LSTM(hidden_size,name='lstm_enc_1'))
+	model.add(RepeatVector(y_max_len))
+
+	# Creating decoder network
+	for i in range(num_layers):
+		model.add(LSTM(hidden_size, name='lstm_%s'%(i+2), return_sequences=True))
+	model.add(TimeDistributed(Dense(y_vocab_len,name='dense')))
+	model.add(Activation('softmax'))
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+
+	return model
+
+
+def seqEncDec2(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM):
+
+	hidden_size = 200
+	num_layers = 3
+
+	model = Sequential()
+	
+	model.add(Embedding(X_vocab_len, EMBEDDING_DIM, input_length=X_max_len, mask_zero=True, name='embedding_layer'))
+	# Creating encoder network
+	model.add(LSTM(hidden_size,name='lstm_enc_1'))
 	model.add(RepeatVector(y_max_len))
 
 	# Creating decoder network
@@ -337,7 +361,7 @@ def seqParallelEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM
 
 	return decoder
 
-
+'''
 def seqSharedEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM):
 
 	hidden_size = 200
@@ -359,7 +383,7 @@ def seqSharedEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM):
 	print(model.summary())
 
 	return model
-
+'''
 ################################################
 # Hierarchical LSTM encoder - decoder type 1
 # with keras functional API vs. sequential model
@@ -388,7 +412,7 @@ def apiHierarchical1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding
 	# Final predictions and model.
 	prediction = Dense(num_classes, activation='softmax', name='dense_out')(encoded_docs)
 	model = Model(x, prediction)
-	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
 
 
@@ -441,14 +465,14 @@ def apiHierarchical2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding
 	sentences_model = Model(sentences_input, lstm_sentence)
 
 	docs_input = Input(shape=(n_docs, MAX_SEQUENCE_LENGTH), dtype='int64')
-	docs_encoded = TimeDistributed(sentences_model,name='td_doc_enc')(docs_input)
+	docs_encoded = TimeDistributed(sentences_model)(docs_input)
 	#dropout = Dropout(0.2)(docs_encoded)
 	docs_model = LSTM(col_hidden_size,name='lstm_enc_2')(docs_encoded)
 
 	# Prediction
 	prediction = Dense(num_classes, activation='softmax', name='dense_out')(docs_model)
 	model = Model(docs_input, prediction)
-	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
 
 
