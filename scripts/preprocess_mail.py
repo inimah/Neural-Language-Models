@@ -22,3 +22,11 @@ if __name__ == '__main__':
 
 	# get list of data files
 	filenames = listData(PATH)
+
+	data={}
+
+	for path in filenames:
+		filepath = os.path.basename(path)
+		fileName, fileExtension = os.path.splitext(filepath)
+		fname, fdate = split_at(fileName, '_', 2)
+		data[fname] = extractData(path)		

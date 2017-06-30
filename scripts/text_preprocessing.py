@@ -91,9 +91,13 @@ def getClassLabel(filenames):
 
 
 # reading data from csv / structured format 
-def extractData(fileDat):   
-   dat = pd.read_table(fileDat,sep=',',index_col=None,header=0,error_bad_lines=False,dtype = unicode)
-   return data
+def extractData(fileDat):
+	dat = pd.read_table(fileDat,sep=',',index_col=None,header=0,error_bad_lines=False,dtype = unicode)\
+	return data
+
+def split_at(s, c, n):
+	words = s.split(c)
+	return c.join(words[:n]), c.join(words[n:])
 
 # reading each text document
 ################################################
@@ -368,7 +372,7 @@ def generateLingSpam(datadictionary):
 		subj[k] = subject
 		cont[k] = content
 
-    # generate tokens from subject title
+	# generate tokens from subject title
 	subjTokens = [value for key, value in subj.items()]
 	subjAllTokens = sum(subjTokens,[])
 
@@ -643,11 +647,11 @@ def getSentencesAll(datadict):
 def createLabelledSentences(wordSentences):
 
 	# labelled sentences with sent_id
-    labelledSentences = []
-    taggedDocument = namedtuple('labelledSentences', 'words tags')
-    for i,text in enumerate(wordSentences):
-        tag = ['sent_%s' %i]
-        labelledSentences.append(taggedDocument(text,tag))
+	labelledSentences = []
+	taggedDocument = namedtuple('labelledSentences', 'words tags')
+	for i,text in enumerate(wordSentences):
+		tag = ['sent_%s' %i]
+		labelledSentences.append(taggedDocument(text,tag))
 
 
 	return labelledSentences
