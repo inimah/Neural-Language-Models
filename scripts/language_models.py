@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #__author__ = "@tita"
-#__update__ = "14.06.2017"
+#__update__ = "01.07.2017"
 #__maintainer__ = "@tita"
 #__email__ = "i.nimah@tue.nl"
 
@@ -242,7 +242,7 @@ def seqEncDec(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM, emb
 
 	model = Sequential()
 	
-	model.add(Embedding(X_vocab_len+1, EMBEDDING_DIM, input_length=X_max_len, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
+	model.add(Embedding(X_vocab_len, EMBEDDING_DIM, input_length=X_max_len, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
 	# Creating encoder network
 	model.add(LSTM(hidden_size,name='lstm_enc_1'))
 	model.add(RepeatVector(y_max_len))
@@ -258,7 +258,7 @@ def seqEncDec(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM, emb
 
 	return model
 
-
+# old model without pre-trained embedding matrix
 def seqEncDec2(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM):
 
 	hidden_size = 200
@@ -293,11 +293,11 @@ def seqParallelEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM
 	nb_classes = 2
 
 	encoder_a = Sequential()
-	encoder_a.add(Embedding(X_vocab_len+1, EMBEDDING_DIM, input_length=X_max_len, mask_zero=True, weights=[X_embedding_weights], name='X_embedding_layer'))
+	encoder_a.add(Embedding(X_vocab_len, EMBEDDING_DIM, input_length=X_max_len, mask_zero=True, weights=[X_embedding_weights], name='X_embedding_layer'))
 	encoder_a.add(LSTM(hidden_size,name='lstm_a'))
 
 	encoder_b = Sequential()
-	encoder_b.add(Embedding(y_vocab_len+1, EMBEDDING_DIM, input_length=y_max_len, mask_zero=True, weights=[y_embedding_weights], name='y_embedding_layer'))
+	encoder_b.add(Embedding(y_vocab_len, EMBEDDING_DIM, input_length=y_max_len, mask_zero=True, weights=[y_embedding_weights], name='y_embedding_layer'))
 	encoder_b.add(LSTM(hidden_size,name='lstm_b'))
 
 	decoder = Sequential()
@@ -311,6 +311,37 @@ def seqParallelEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM
 
 
 	return decoder
+
+
+################################################
+# Encoder - decoder for language model
+# train on short text monolingual data (single sentence)
+
+################################################
+def seqMonoEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 200
+	num_layers = 3
+
+	model = Sequential()
+	
+	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
+
+	# Creating encoder network
+	# encoding text input (sequence of words) into sentence embedding
+	model.add(LSTM(hidden_size,name='lstm_enc_1'))
+	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
+
+	# Creating decoder network
+	# objective function: predicting next words (language model)
+	for i in range(num_layers):
+		model.add(LSTM(hidden_size, name='lstm_%s'%(i+2), return_sequences=True))
+	model.add(TimeDistributed(Dense(VOCAB_LENGTH,name='dense_output')))
+	model.add(Activation('softmax'))
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	return model
 
 '''
 def seqSharedEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM):
@@ -345,47 +376,99 @@ def seqSharedEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM):
 # ( _____   ___________   _________   ____________ )
 # ( n_docs, n_sentences,   n_words    dim_embedding)
 ################################################
-def apiHierarchical1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+def hierarchyTDEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights,num_classes):
 
 	row_hidden_size = 200
 	col_hidden_size = 200
-	num_classes = 2
+
+	if num_classes > 2:
+		loss_function = 'categorical_crossentropy'
+	else:
+		loss_function = 'binary_crossentropy'
+
 
 	x = Input(shape=(MAX_SEQUENCE_LENGTH, ), dtype='int64')
 	# embedding layer
-	embedded_sentences = Embedding(VOCAB_LENGTH + 1, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, name='embedding_layer')(x)
+	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(x)
+	# Encoder model
 	# Encodes sentences
 	encoded_sentences = TimeDistributed(LSTM(row_hidden_size, name='lstm_enc_1'))(embedded_sentences)
-	#encoded_sentences = LSTM(row_hidden_size, name='lstm_enc_1', return_sequences=True)(embedded_sentences)
+	
+	# Encodes documents
+	encoded_docs = LSTM(col_hidden_size, name='lstm_enc_2')(encoded_sentences)
+
+	# Decoder model
+	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
+
+	# Creating decoder network
+	# objective function: predicting next words (language model)
+	for i in range(num_layers):
+		model.add(LSTM(hidden_size, name='lstm_%s'%(i+2), return_sequences=True))
+	model.add(TimeDistributed(Dense(VOCAB_LENGTH,name='dense_output')))
+	model.add(Activation('softmax'))
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+
+
+	# Final predictions and model.
+	prediction = Dense(num_classes, activation='softmax', name='dense_out')(encoded_docs)
+	model = Model(x, prediction)
+	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	return model
+
+
+def hierarchyTDClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights,num_classes):
+
+	row_hidden_size = 200
+	col_hidden_size = 200
+
+	if num_classes > 2:
+		loss_function = 'categorical_crossentropy'
+	else:
+		loss_function = 'binary_crossentropy'
+
+
+	x = Input(shape=(MAX_SEQUENCE_LENGTH, ), dtype='int64')
+	# embedding layer
+	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(x)
+	# Encodes sentences
+	encoded_sentences = TimeDistributed(LSTM(row_hidden_size, name='lstm_enc_1'))(embedded_sentences)
+	
 	# Encodes documents
 	encoded_docs = LSTM(col_hidden_size, name='lstm_enc_2')(encoded_sentences)
 
 	# Final predictions and model.
 	prediction = Dense(num_classes, activation='softmax', name='dense_out')(encoded_docs)
 	model = Model(x, prediction)
-	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
-
 
 	return model
 
-def seqHierarchical1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def seqTDClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
 
 	row_hidden_size = 200
 	col_hidden_size = 200
-	num_classes = 2
+
+	if num_classes > 2:
+		loss_function = 'categorical_crossentropy'
+	else:
+		loss_function = 'binary_crossentropy'
 
 	model = Sequential()	
 	# input captured here is sequence of sentences in shape (rows, time_steps, n_dim)
-	model.add(Embedding(VOCAB_LENGTH + 1, EMBEDDING_DIM, input_shape=(MAX_SEQUENCE_LENGTH,), mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
+	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_shape=(MAX_SEQUENCE_LENGTH,), mask_zero=True, trainable = True, weights=[embedding_weights], name='embedding_layer'))
 	# encoding rows (sentences)
 	model.add(TimeDistributed(LSTM(row_hidden_size,name='lstm_enc_1')))
-	#model.add(LSTM(row_hidden_size,name='lstm_enc_1'))
 
 	# encoding cols (documents)
 	model.add(LSTM(col_hidden_size,name='lstm_enc_2'))
 	model.add(Dense(num_classes, activation='softmax', name='dense_out'))
-	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
 
 	print(model.summary())
 
@@ -403,15 +486,19 @@ def seqHierarchical1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding
 # ( _____   ___________   _________   ____________ )
 # ( n_docs, n_sentences,   n_words    dim_embedding)
 ################################################
-def apiHierarchical2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def hierarchyClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
 
 	n_docs = 1
 	row_hidden_size = 200
 	col_hidden_size = 200
-	num_classes = 2
+
+	if num_classes > 2:
+		loss_function = 'categorical_crossentropy'
+	else:
+		loss_function = 'binary_crossentropy'
 
 	sentences_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
-	embedded_sentences = Embedding(VOCAB_LENGTH + 1, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, name='embedding_layer')(sentences_input)
+	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sentences_input)
 	lstm_sentence = LSTM(row_hidden_size,name='lstm_enc_1')(embedded_sentence)
 	sentences_model = Model(sentences_input, lstm_sentence)
 
@@ -423,22 +510,27 @@ def apiHierarchical2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding
 	# Prediction
 	prediction = Dense(num_classes, activation='softmax', name='dense_out')(docs_model)
 	model = Model(docs_input, prediction)
-	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
 
 
 	return model
 
-def seqHierarchical2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def seqClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
 
 	n_docs = 1
 	row_hidden_size = 200
 	col_hidden_size = 200
-	num_classes = 2
+
+	if num_classes > 2:
+		loss_function = 'categorical_crossentropy'
+	else:
+		loss_function = 'binary_crossentropy'
+
 
 	sentences_model = Sequential()
 	# input captured here is sequence of sentences in shape (rows, time_steps, n_dim)
-	sentences_model.add(Embedding(VOCAB_LENGTH + 1, EMBEDDING_DIM, input_shape=(MAX_SEQUENCE_LENGTH,), mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
+	sentences_model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_shape=(MAX_SEQUENCE_LENGTH,), mask_zero=True, trainable = True, weights=[embedding_weights], name='embedding_layer'))
 	# Creating encoder for capturing sentence embedding
 	sentences_model.add(LSTM(row_hidden_size,name='lstm_enc_1'))
 
@@ -453,7 +545,7 @@ def seqHierarchical2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding
 
 	# Prediction
 	model.add(Dense(num_classes, activation='softmax', name='dense_out'))
-	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
 
 	return model
