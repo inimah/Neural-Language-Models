@@ -31,7 +31,7 @@ from collections import namedtuple
 import argparse
 import logging
 from gensim.models import Word2Vec
-import deepdish as dd
+#import deepdish as dd
 
 np.random.seed([3,1415])
 
@@ -92,8 +92,15 @@ def getClassLabel(filenames):
 
 # reading data from csv / structured format 
 def extractData(fileDat):
-	dat = pd.read_table(fileDat,sep=',',index_col=None,header=0,error_bad_lines=False,dtype = unicode)\
+	data = pd.read_table(fileDat,sep=',',index_col=None,header=0,error_bad_lines=False,dtype = unicode)
 	return data
+
+
+def writeData(df,filename):
+	file = open(filename, 'w')
+	file.write(df)
+	file.close()
+
 
 def split_at(s, c, n):
 	words = s.split(c)
@@ -202,6 +209,73 @@ def indexToWords(vocab,numSentence):
 	revertSentence = [vocab[i] for i in numSentence]
 
 	return revertSentence
+
+
+# tokenized unlabelled corpus
+# and generate vocabulary word list
+# for short text document (single sentence)
+################################################
+def generateSentVocab(documents):
+
+	docwords = []
+	alltokens = []
+    # tokenized words per sentence 
+	for text in documents:
+		txt = str(text).lower()
+		tmp = nltk.word_tokenize(txt.decode('utf-8','ignore'))
+		docwords.append(tmp)
+
+	# merge all tokens into one list
+	alltokens = sum(docwords,[])
+
+	# frequency occurence of terms
+	tf = nltk.FreqDist(alltokens)
+	# terms / unique words
+	terms = tf.keys()
+	terms.insert(0,'zerostart')
+	terms.append('EOF')
+	terms.append('UNK')
+	vocab = dict([(i,terms[i]) for i in range(len(terms))])
+
+
+	return docwords, vocab
+
+
+# tokenized unlabelled corpus
+# and generate vocabulary word list
+# for longer text document (multiple sentences)
+################################################
+def generateDocVocab(documents):
+
+	
+	docwords = []
+	docsents = []
+
+    # tokenized words per document
+	for text in documents:
+		txt = str(text).lower()
+		tmp = nltk.word_tokenize(txt.decode('utf-8','ignore'))
+		docwords.append(tmp)
+
+	# splitting document into sentences
+	for text in docwords:
+		tmp = splitSentences(text)
+		docsents.append(tmp)
+
+	# merge all tokens into one list
+	alltokens = sum(docwords,[])
+
+	# frequency occurence of terms
+	tf = nltk.FreqDist(alltokens)
+	# terms / unique words
+	terms = tf.keys()
+	terms.insert(0,'zerostart')
+	terms.append('EOF')
+	terms.append('UNK')
+	vocab = dict([(i,terms[i]) for i in range(len(terms))])
+
+
+	return docwords, docsents, vocab
 
 # creating word vocabulary and training sets for bi-lingual corpora pairs
 # text documents need to be stored in their corresponding language folders (eg: en, nl)
