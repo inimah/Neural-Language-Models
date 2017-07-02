@@ -27,7 +27,7 @@ pattern = r"""
  (?:[A-Z]\.)+           # abbreviations, e.g. U.S.A.
  |\$?\d+(?:\.?,\d+)?%?       # numbers, incl. currency and percentages
  |\w+(?:[-']\w+)*       # words w/ optional internal hyphens/apostrophe
- |(?:[`'^~\":;,.?(){}/\\/+/\-|=#$%@&*\]\[><!])         # special characters with meanings
+ |(?:[`'^~\"\':;,.?(){}/\\/+/\-|=#$%@&*\]\[><!])         # special characters with meanings
  """
 
 

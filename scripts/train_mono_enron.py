@@ -30,15 +30,15 @@ NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
-PATH = 'prepdata/lingspam'
+PATH = 'prepdata/enron'
 
 
 if __name__ == '__main__':
 
 	# reading stored pre-processed (in pickle format)
 
-	subject_vocab = readPickle(os.path.join(PATH,'lingspam_subjVocab'))
-	mail_vocab = readPickle(os.path.join(PATH,'lingspam_contVocab'))
+	subject_vocab = readPickle(os.path.join(PATH,'enron_subjVocab'))
+	mail_vocab = readPickle(os.path.join(PATH,'enron_contVocab'))
 	allSubjects = readPickle(os.path.join(PATH, 'allSubjects'))
 	allMails = readPickle(os.path.join(PATH,'allMails'))
 	allNumSubjects = readPickle(os.path.join(PATH, 'allNumSubjects'))
@@ -71,30 +71,30 @@ if __name__ == '__main__':
 	
 
 	# word2vec model of mail subjects
-	w2v_subj_ls1, w2v_subj_ls2, w2v_subjls_embed1, w2v_subjls_embed2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
+	w2v_subj_enr1, w2v_subj_enr2, w2v_subjenr_embed1, w2v_subjenr_embed2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
 
-	w2v_subj_ls1.save('w2v_subj_ls1')
-	w2v_subj_ls2.save('w2v_subj_ls2')
-	savePickle(w2v_subjls_embed1,'w2v_subjls_embed1')
-	savePickle(w2v_subjls_embed2,'w2v_subjls_embed2')
+	w2v_subj_enr1.save('w2v_subj_enr1')
+	w2v_subj_enr2.save('w2v_subj_enr2')
+	savePickle(w2v_subjenr_embed1,'w2v_subjenr_embed1')
+	savePickle(w2v_subjenr_embed2,'w2v_subjenr_embed2')
 
 
 	# create document representation of word vectors
 
 	# By averaging word vectors
-	avg_subjls_embed1 = averageWE(w2v_subj_ls1, subjSentences)
-	avg_subjls_embed2 = averageWE(w2v_subj_ls2, subjSentences)
+	avg_subjenr_embed1 = averageWE(w2v_subj_enr1, subjSentences)
+	avg_subjenr_embed2 = averageWE(w2v_subj_enr2, subjSentences)
 
-	savePickle(avg_subjls_embed1,'avg_subjls_embed1')
-	savePickle(avg_subjls_embed2,'avg_subjls_embed2')
+	savePickle(avg_subjenr_embed1,'avg_subjenr_embed1')
+	savePickle(avg_subjenr_embed2,'avg_subjenr_embed2')
 
 
 	# By averaging and idf weights of word vectors
-	avgIDF_subjls_embed1 = averageIdfWE(w2v_subj_ls1, subjSentences)
-	avgIDF_subjls_embed2 = averageIdfWE(w2v_subj_ls2, subjSentences)
+	avgIDF_subjenr_embed1 = averageIdfWE(w2v_subj_enr1, subjSentences)
+	avgIDF_subjenr_embed2 = averageIdfWE(w2v_subj_enr2, subjSentences)
 
-	savePickle(avgIDF_subjls_embed1,'avgIDF_subjls_embed1')
-	savePickle(avgIDF_subjls_embed2,'avgIDF_subjls_embed2')
+	savePickle(avgIDF_subjenr_embed1,'avgIDF_subjenr_embed1')
+	savePickle(avgIDF_subjenr_embed2,'avgIDF_subjenr_embed2')
 
 
 
@@ -111,14 +111,14 @@ if __name__ == '__main__':
 	labelledSentences = createLabelledSentences(subjSentences)
 
 	# doc2vec model
-	d2v_subj_ls1, d2v_subj_ls2, d2v_subj_ls3, d2v_subj_ls_embed1, d2v_subj_ls_embed2, d2v_subj_ls_embed3 = docEmbedding(labelledSentences, subject_vocab, 200, 50)
+	d2v_subj_enr1, d2v_subj_enr2, d2v_subj_enr3, d2v_subj_enr_embed1, d2v_subj_enr_embed2, d2v_subj_enr_embed3 = docEmbedding(labelledSentences, subject_vocab, 200, 50)
 
-	d2v_subj_ls1.save('d2v_subj_ls1')
-	d2v_subj_ls2.save('d2v_subj_ls2')
-	d2v_subj_ls3.save('d2v_subj_ls3')
-	savePickle(d2v_subj_ls_embed1,'d2v_subj_ls_embed1')
-	savePickle(d2v_subj_ls_embed2,'d2v_subj_ls_embed2')
-	savePickle(d2v_subj_ls_embed3,'d2v_subj_ls_embed3')
+	d2v_subj_enr1.save('d2v_subj_enr1')
+	d2v_subj_enr2.save('d2v_subj_enr2')
+	d2v_subj_enr3.save('d2v_subj_enr3')
+	savePickle(d2v_subj_enr_embed1,'d2v_subj_enr_embed1')
+	savePickle(d2v_subj_enr_embed2,'d2v_subj_enr_embed2')
+	savePickle(d2v_subj_enr_embed3,'d2v_subj_enr_embed3')
 
 
 	## For mail contents
