@@ -355,6 +355,7 @@ def generatePairset(datadictionary):
 
 # creating word vocabulary and training sets
 # for monolingual corpora
+# general text
 ################################################
 
 def generateTrainset(datadictionary):
@@ -410,7 +411,10 @@ def generateTrainset(datadictionary):
 	return mergedTokens, worddocs_freq, vocab, alltokens, alldocs
 
 # creating word vocabulary and training sets
+# for mail data
 # for "LingSpam" data set
+# or data with class label (e.g binary spam - nonspam label)
+# text contents of mail also include subject and original content --> need to be separated
 ################################################
 def generateLingSpam(datadictionary):
 
@@ -435,18 +439,27 @@ def generateLingSpam(datadictionary):
 						keyword = 'subject:'
 						# get title after keyword
 						beforeKey, inKey, afterKey = lSubj.partition(keyword)
+						afterKey.decode('utf-8','ignore')
+						afterKey.decode('utf-8').encode('ascii','ignore')
 						# tokenize
-						subjTitle = nltk.word_tokenize(afterKey.decode('utf-8','ignore'))
+						subjTitle = nltk.word_tokenize(afterKey)
 					else:
 						tmpCont = line.lower()
+						tmpCont.decode('utf-8','ignore')
+						tmpCont.decode('utf-8').encode('ascii','ignore')
 						# get tokenized content
-						contWords = nltk.word_tokenize(tmpCont.decode('utf-8','ignore')) 
+						contWords = nltk.word_tokenize(tmpCont) 
 
 			subject.append(subjTitle)
 			content.append(contWords)
 
-		subj[k] = subject
-		cont[k] = content
+		# escape unicode characters if anys - transform to string format of text
+		strSubj = convert(subject)
+		strCont = convert(content)
+
+		# these are tokenized words for subject and content of mail
+		subj[k] = strSubj
+		cont[k] = strCont
 
 	# generate tokens from subject title
 	subjTokens = [value for key, value in subj.items()]
@@ -457,12 +470,11 @@ def generateLingSpam(datadictionary):
 	subjUnique = subjFreq.keys()
 	# add 'zero' as the first vocab and 'UNK' as unknown words
 	subjUnique.insert(0,'zerostart')
+	subjUnique.append('EOF')
 	subjUnique.append('UNK')
 	# indexing word vocabulary : pairs of (index,word)
 	subjVocab=dict([(i,subjUnique[i]) for i in range(len(subjUnique))])
-	# save vocabulary list
-	savePickle(subjVocab,'subject_vocabulary')
-
+	
 	# generate tokens from mail contents
 	contentTokens = [value for key, value in cont.items()]
 	contentAllTokens = sum(contentTokens,[])
@@ -472,11 +484,11 @@ def generateLingSpam(datadictionary):
 	contUnique = contFreq.keys()
 	# add 'zero' as the first vocab and 'UNK' as unknown words
 	contUnique.insert(0,'zerostart')
+	contUnique.append('EOF')
 	contUnique.append('UNK')
 	# indexing word vocabulary : pairs of (index,word)
 	contVocab=dict([(i,contUnique[i]) for i in range(len(contUnique))])
-	# save vocabulary list
-	savePickle(contVocab,'mail_vocabulary')
+	
 
 	# encode tokenized of words in document into its index/numerical val. in vocabulary list
 	# for subject
@@ -493,17 +505,9 @@ def generateLingSpam(datadictionary):
 		for i in range(len(cont[k])):
 			numericCont.append(wordsToIndex(contVocab,cont[k][i]))
 		allCont[k] = numericCont
-	
-	savePickle(allSubj,'allSubjects')
-	# alternative - saving as h5 file
-	#saveH5Dict('allSubjects.h5',allSubj)	
-
-	savePickle(allCont,'allMails')
-	# alternative - saving as h5 file
-	#saveH5Dict('allMails.h5',allCont)	
 
 
-	return subjVocab, contVocab, subjAllTokens, contentAllTokens, allSubj, allCont
+	return subjVocab, contVocab, subj, cont, allSubj, allCont
 
 # creating word vocabulary and training sets
 # for "Spamassasin" data set
