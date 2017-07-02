@@ -25,13 +25,11 @@ PATH = '/opt/data/phishing_mails/content'
 
 
 # to check length of body between 3 attributes of body
-def body_len(text1, text2, text3):
+def body_len(text1, text2):
 	if len(text1) > 3:
 		return text1
-	elif len(text2) > 3:
-		return text2
 	else:
-		return text3
+		return text2
 
 def clean_html_javascript(text):
 	soup = BeautifulSoup(text, "lxml")
@@ -73,7 +71,6 @@ if __name__ == '__main__':
 	subject = []
 	body1 = []
 	body2 = []
-	body3 = []
 	sender = []
 
 	for i in data:	
@@ -83,7 +80,6 @@ if __name__ == '__main__':
 			sender.append(data[i]['SENDER_EMAIL'][j])
 			body1.append(data[i]['BODY'][j])
 			body2.append(data[i]['BODY_HTML'][j])
-			body3.append(data[i]['BODY_RTF'][j])
 		
 
 	mail['yearmonth'] = yearmonth
@@ -91,16 +87,20 @@ if __name__ == '__main__':
 	mail['sender'] = sender
 	mail['body1'] = body1
 	mail['body2'] = body2
-	mail['body3'] = body3
 
-	#mail = mail.reset_index(drop=True)
+	
 
-	mail['body'] = mail.apply(lambda x: body_len(str(x['body1']),str(x['body2']),str(x['body3'])), axis=1) 
-	mail['cleantxt']= mail['body'].apply(lambda x: clean_html_javascript(str(x)))
-	mail['txtbody']= mail['cleantxt'].apply(lambda x: x.encode('utf-8').replace('\r', ' ').replace('\n', ' '))
+	mail['body'] = mail.apply(lambda x: body_len(str(x['body1']),str(x['body2'])), axis=1) 
+
+	cleanmail = mail[(mail['subject'] != '') & (mail['body'] != '')]
+
+	cleanmail['clean1']= cleanmail['body'].apply(lambda x: clean_html_javascript(str(x)))
+	cleanmail['clean2']= cleanmail['clean1'].apply(lambda x: x.encode('utf-8').replace('\r', ' ').replace('\n', ' '))
+	cleanmail['txtbody']= cleanmail['clean2'].apply(lambda x:x.decode("utf-8").encode("ascii", "ignore"))
 
 
-	maildata = mail[['yearmonth', 'sender', 'subject','txtbody']] 
+	maildata = cleanmail[['yearmonth', 'sender', 'subject','txtbody']] 
+	maildata = maildata.reset_index(drop=True)
 	maildata.to_csv('maildata.csv', index=True, header = True, sep='\t')
 
 	timeset = set(yearmonth)
@@ -116,7 +116,7 @@ if __name__ == '__main__':
 	senders = maildata['sender']
 	contents = maildata['txtbody']
 
-
+	'''
 	savePickle(subjects, 'allSubjects')
 	savePickle(senders, 'allSenders')
 	savePickle(contents, 'allContent')
@@ -127,6 +127,8 @@ if __name__ == '__main__':
 	# generating vocab
 	subject_sent, subject_vocab = generateSentVocab(subjects)
 	savePickle(subject_vocab,'subject_vocab')
+	savePickle(subject_sent,'subject_sentences')
+
 
 	# word2vec model of mail subjects
 	w2v_subj_sg, w2v_subj_cbow, w2v_subj_embed_sg, w2v_subj_embed_cbow = wordEmbedding(subject_sent, subject_vocab, 200, 50)
@@ -139,13 +141,14 @@ if __name__ == '__main__':
 	avg_subj_embed2 = averageWE(w2v_subj_cbow, subject_sent)
 
 	# By sequential model : shallow encoder
+	
 
 	# By sequential model : hierarchical encoder
 
 	####################################
 	# for mail contents
 
-	content_words, content_sents, content_vocab = generateDocVocab(content)
+	content_words, content_sents, content_vocab = generateDocVocab(contents)
 	savePickle(content_vocab,'content_vocab')
 
 	# word2vec model of mail subjects
@@ -157,5 +160,8 @@ if __name__ == '__main__':
 	# By averaging word vectors
 	avg_cont_embed1 = averageWE(w2v_cont_sg, content_sents)
 	avg_cont_embed2 = averageWE(w2v_cont_cbow, content_sents)
+
+	'''
+
 
 
