@@ -424,7 +424,6 @@ def seqTDEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weig
 	col_hidden_size = 200
 	num_layers = 3
 
-
 	model = Sequential()	
 	# input captured here is sequence of sentences in shape (rows, time_steps, n_dim)
 	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_shape=(MAX_SEQUENCE_LENGTH,), mask_zero=True, trainable = True, weights=[embedding_weights], name='embedding_layer'))
