@@ -131,10 +131,14 @@ def docEmbedding(documents, vocab, argsize, argiter):
 
 	print('Training doc2vec model...')
 
-	for epoch in range(argiter):
-		model1.train(documents)
-		model2.train(documents)
-		model3.train(documents)
+	# number of tokens
+	n_tokens = sum([len(sent) for sent in documents])
+	# number of sentences/documents
+	n_examples = len(documents)
+
+	model1.train(documents, total_words=n_tokens, total_examples=n_examples, epochs=argiter)
+	model2.train(documents, total_words=n_tokens, total_examples=n_examples, epochs=argiter)
+	model3.train(documents, total_words=n_tokens, total_examples=n_examples, epochs=argiter)
 
 
 	doc2vec_weights1 = model1.wv.syn0
