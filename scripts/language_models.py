@@ -76,8 +76,8 @@ def wordEmbedding(documents, vocab, argsize, argiter):
 	print('Training word2vec model...')
 
 	for epoch in range(argiter):
-		model1.train(documents)
-		model2.train(documents)
+		model1.train(documents, total_examples = self.corpus_count, epochs = self.iter)
+		model2.train(documents, total_examples = self.corpus_count, epochs = self.iter)
 
 	word2vec_weights1 = model1.wv.syn0
 	word2vec_weights2 = model2.wv.syn0    
