@@ -10,7 +10,7 @@ import sys
 import numpy as np
 from text_preprocessing import *
 from language_models import *
-from clustering import *
+
 
 import argparse
 
@@ -30,17 +30,21 @@ NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
-LINGSPAM_PATH = '../data/lingspam'
+PATH = 'prepdata/lingspam'
 
 
 if __name__ == '__main__':
 
 	# reading stored pre-processed (in pickle format)
 
-	subject_vocab = readPickle(os.path.join(LINGSPAM_PATH,'subject_vocabulary'))
-	mail_vocab = readPickle(os.path.join(LINGSPAM_PATH,'mail_vocabulary'))
-	allSubjects = readPickle(os.path.join(LINGSPAM_PATH, 'allSubjects'))
-	allMails = readPickle(os.path.join(LINGSPAM_PATH,'allMails'))
+	subject_vocab = readPickle(os.path.join(PATH,'lingspam_subjVocab'))
+	mail_vocab = readPickle(os.path.join(PATH,'lingspam_contVocab'))
+	allSubjects = readPickle(os.path.join(PATH, 'allSubjects'))
+	allMails = readPickle(os.path.join(PATH,'allMails'))
+	allNumSubjects = readPickle(os.path.join(PATH, 'allNumSubjects'))
+	allNumMails = readPickle(os.path.join(PATH,'allNumMails'))
+
+	'''
 
 	## For mail subject (short text part of mail)
 	#######################################################
@@ -113,6 +117,7 @@ if __name__ == '__main__':
 
 	## For mail contents
 	#######################################################
+	'''
 
 
 

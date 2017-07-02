@@ -13,20 +13,20 @@ from text_preprocessing import *
 
 
 
-LINGSPAM_PATH = '../data/lingspam/raw'
+ENRON_PATH = '~/exp/data/maildata/enron/preprocessed'
 
 
 if __name__ == '__main__':
 	# get list of data files
-	filenames = listData(LINGSPAM_PATH)
+	filenames = listData(ENRON_PATH)
 	# grouped by class
 	datadict = getClassLabel(filenames)
 
 	# return tokenized subject and mail content 
 	subjVocab, contVocab, subject, content, numSubj, numCont = generateMailVocab(datadict)
 	# save vocabulary list
-	savePickle(subjVocab,'lingspam_subjVocab')
-	savePickle(contVocab,'lingspam_contVocab')
+	savePickle(subjVocab,'enron_subjVocab')
+	savePickle(contVocab,'enron_contVocab')
 	savePickle(subject,'allSubjects')
 	savePickle(numSubj,'allNumSubjects')
 	savePickle(content,'allMails')

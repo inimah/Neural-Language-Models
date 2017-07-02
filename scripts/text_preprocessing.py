@@ -405,18 +405,16 @@ def generateTrainset(datadictionary):
 	savePickle(alldocs,'documents')
 	# alternative - saving as h5 file
 	#saveH5Dict('documents.h5',alldocs)
-
 	   
 
 	return mergedTokens, worddocs_freq, vocab, alltokens, alldocs
 
 # creating word vocabulary and training sets
 # for mail data
-# for "LingSpam" data set
-# or data with class label (e.g binary spam - nonspam label)
+# specifically data with class label (e.g binary spam - nonspam label)
 # text contents of mail also include subject and original content --> need to be separated
 ################################################
-def generateLingSpam(datadictionary):
+def generateMailVocab(datadictionary):
 
 	subj = dict()
 	cont = dict()
@@ -508,13 +506,6 @@ def generateLingSpam(datadictionary):
 
 
 	return subjVocab, contVocab, subj, cont, allSubj, allCont
-
-# creating word vocabulary and training sets
-# for "Spamassasin" data set
-################################################
-def generateSpamAssasin(datadictionary):
-
-	return 0
 
 
 # characters for end-of-sentence markers
