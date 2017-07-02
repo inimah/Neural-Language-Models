@@ -27,7 +27,7 @@ pattern = r"""
  (?:[A-Z]\.)+           # abbreviations, e.g. U.S.A.
  |\$?\d+(?:\.?,\d+)?%?       # numbers, incl. currency and percentages
  |\w+(?:[-']\w+)*       # words w/ optional internal hyphens/apostrophe
- |(?:[`'^~\":;,.?()+/\-|=#$%@&*\]\[><!])         # special characters with meanings
+ |(?:[`'^~\":;,.?(){}/\\/+/\-|=#$%@&*\]\[><!])         # special characters with meanings
  """
 
 
@@ -200,7 +200,8 @@ def averageIdfWE(word2vec_model, documents):
 	w2v = dict(zip(w2v_vocab, w2v_weights))
 	dim = len(w2v.itervalues().next())
 
-	# calculating Tf-Idf weights
+	
+	print('calculating Tf-Idf weights...')
 	
 	# transforming tokenized documents into string format - following the input format of TfidfVectorizer
 	strSentences = sequenceToStr(documents)
@@ -225,7 +226,7 @@ def averageIdfWE(word2vec_model, documents):
 	# max_idf = max(tfidf.idf_)
 
 	doc_embedding = []
-	for i,text in enumerate(strSentences):
+	for i,text in enumerate(documents):
 		embedding = np.mean([w2v[w] * wordIdf[w]
 				for w in text if w in w2v] or
 				[np.zeros(dim)], axis=0)
