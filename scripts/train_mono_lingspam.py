@@ -60,13 +60,13 @@ if __name__ == '__main__':
 			classLabel.append(i)
 		subjSentences += allSubjects[i]
 
-	#savePickle(subjSentences,'lingspam_subjSentences')
+	savePickle(subjSentences,'lingspam_subjSentences')
 
 	subjNumSentences = []
 	for i in allSubjects:
 		subjNumSentences += allNumSubjects[i]
 
-	#savePickle(subjNumSentences,'lingspam_subjNumSentences')
+	savePickle(subjNumSentences,'lingspam_subjNumSentences')
 
 	
 
@@ -90,8 +90,8 @@ if __name__ == '__main__':
 
 
 	# By averaging and idf weights of word vectors
-	avgIDF_subjls_embed1 = averageIdfWE(w2v_subj_ls1, subjSentences)
-	avgIDF_subjls_embed2 = averageIdfWE(w2v_subj_ls2, subjSentences)
+	avgIDF_subjls_embed1 = averageIdfWE(w2v_subj_ls1, subject_vocab, subjSentences)
+	avgIDF_subjls_embed2 = averageIdfWE(w2v_subj_ls2, subject_vocab, subjSentences)
 
 	savePickle(avgIDF_subjls_embed1,'avgIDF_subjls_embed1')
 	savePickle(avgIDF_subjls_embed2,'avgIDF_subjls_embed2')

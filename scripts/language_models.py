@@ -9,6 +9,7 @@ import os
 import sys
 import numpy as np
 import nltk
+import math
 from gensim.models import Word2Vec, Doc2Vec
 from sklearn.feature_extraction.text import TfidfVectorizer
 from keras.models import Sequential, Model
@@ -22,13 +23,15 @@ from keras.layers.merge import Concatenate
 
 
 # since we preserve all possible words/characters/information, we need to add regex in tokenizer of sklearn TfIdfVectorizer 
+'''
 pattern = r"""
  (?x)                   # set flag to allow verbose regexps
  (?:[A-Z]\.)+           # abbreviations, e.g. U.S.A.
  |\$?\d+(?:\.?,\d+)?%?       # numbers, incl. currency and percentages
  |\w+(?:[-']\w+)*       # words w/ optional internal hyphens/apostrophe
- |(?:[`'^~\"\':;,.?(){}/\\/+/\-|=#$%@&*\]\[><!])         # special characters with meanings
+ |(?:[`'^~\":;,.?(){}/\\/+/\-|=#$%@&*\]\[><!])         # special characters with meanings
  """
+ '''
 
 
 ################################################
@@ -193,7 +196,28 @@ def averageWE(word2vec_model, documents):
 # generating sentence-level / document embedding by averaging word2vec and Tf-Idf penalty
 # document here is sentence - or sequence of words
 ################################################
-def averageIdfWE(word2vec_model, documents):
+
+def countFrequency(word, doc):
+	return doc.count(word)
+
+def docFrequency(word, list_of_docs):
+	count = 0
+	for document in list_of_docs:
+		if countFrequency(word, document) > 0:
+			count += 1
+	return 1 + count
+
+def computeIDF(word, list_of_docs):
+
+	# idf(term) = ( log ((1 + nd)/(1 + df(doc,term))) ) 
+	# where nd : number of document in corpus; 
+	# df : doc frequency (number of documents containing term)
+
+	idf = math.log( (1 + len(list_of_docs)) / float(docFrequency(word, list_of_docs)))
+
+	return idf
+
+def averageIdfWE(word2vec_model, vocab, documents):
 
 	w2v_vocab = word2vec_model.wv.index2word
 	w2v_weights = word2vec_model.wv.syn0
@@ -202,28 +226,31 @@ def averageIdfWE(word2vec_model, documents):
 
 	
 	print('calculating Tf-Idf weights...')
-	
+	'''
 	# transforming tokenized documents into string format - following the input format of TfidfVectorizer
-	strSentences = sequenceToStr(documents)
+	#strSentences = sequenceToStr(documents)
 
-	tfidf = TfidfVectorizer(analyzer=partial(nltk.regexp_tokenize, pattern=pattern), use_idf=True, smooth_idf= True, norm=None, stop_words=None)
-	tfidf_matrix = tfidf.fit_transform(strSentences)
+	#tfidf = TfidfVectorizer(analyzer=partial(nltk.regexp_tokenize, pattern=pattern), use_idf=True, smooth_idf= True, norm=None, stop_words=None)
+	#tfidf_matrix = tfidf.fit_transform(strSentences)
 	# the resulting document term matrix (tf-idf doc-term matrix)
-	arrTfIdf = tfidf_matrix.todense()
+	#arrTfIdf = tfidf_matrix.todense()
 
 	# sklearn library use the following formula of idf
-	# idf(term) = ( log ((1 + nd)/(1 + df(doc,term))) ) + 1
-	# where nd : number of document in corpus; 
-	# df : doc frequency (number of documents containing term)
+	
 
 	# use idf weights as the weight of word vectors
-	idf = tfidf.idf_ 
-	wordIdf = dict(zip(tfidf.get_feature_names(), idf))
+	#idf = tfidf.idf_ 
+	#wordIdf = dict(zip(tfidf.get_feature_names(), idf))
+	'''
 
-	# if a word was never seen - it must be at least as infrequent
-	# as any of the known words - so the default idf is the max of 
-	# known idf's
-	# max_idf = max(tfidf.idf_)
+	words = []
+	for k,v in vocab.iteritems():
+		words.append(v)
+
+	wordIdf = {}
+
+	for i,txt in enumerate(words): 
+		wordIdf[txt] = computeIDF(txt, documents)
 
 	doc_embedding = []
 	for i,text in enumerate(documents):
