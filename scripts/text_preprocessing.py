@@ -225,8 +225,9 @@ def generateSentVocab(documents):
 		tmp = nltk.word_tokenize(txt.decode('utf-8','ignore'))
 		docwords.append(tmp)
 
+	words = convert(docwords)
 	# merge all tokens into one list
-	alltokens = sum(docwords,[])
+	alltokens = sum(words,[])
 
 	# frequency occurence of terms
 	tf = nltk.FreqDist(alltokens)
@@ -238,7 +239,7 @@ def generateSentVocab(documents):
 	vocab = dict([(i,terms[i]) for i in range(len(terms))])
 
 
-	return docwords, vocab
+	return words, vocab
 
 
 # tokenized unlabelled corpus
@@ -262,6 +263,7 @@ def generateDocVocab(documents):
 		tmp = splitSentences(text)
 		docsents.append(tmp)
 
+	words = convert(docwords)
 	# merge all tokens into one list
 	alltokens = sum(docwords,[])
 
@@ -275,7 +277,7 @@ def generateDocVocab(documents):
 	vocab = dict([(i,terms[i]) for i in range(len(terms))])
 
 
-	return docwords, docsents, vocab
+	return words, docsents, vocab
 
 # creating word vocabulary and training sets for bi-lingual corpora pairs
 # text documents need to be stored in their corresponding language folders (eg: en, nl)
