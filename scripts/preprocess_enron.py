@@ -13,7 +13,7 @@ from text_preprocessing import *
 
 
 
-ENRON_PATH = '~/exp/data/maildata/enron/preprocessed'
+ENRON_PATH = '/home/inimah/exp/data/maildata/enron/preprocessed'
 
 
 if __name__ == '__main__':

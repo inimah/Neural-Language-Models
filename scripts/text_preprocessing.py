@@ -427,6 +427,8 @@ def generateMailVocab(datadictionary):
 		subject = []
 		content = []
 		for mail in datadictionary[k]:
+			subjTitle = []
+			contWords = []
 			
 			with open(mail) as f:
 				for i,line in enumerate(f):		
@@ -437,16 +439,16 @@ def generateMailVocab(datadictionary):
 						keyword = 'subject:'
 						# get title after keyword
 						beforeKey, inKey, afterKey = lSubj.partition(keyword)
-						afterKey.decode('utf-8','ignore')
-						afterKey.decode('utf-8').encode('ascii','ignore')
+						
+						#afterKey.encode('ascii', 'ignore')
 						# tokenize
-						subjTitle = nltk.word_tokenize(afterKey)
+						subjTitle = nltk.word_tokenize(afterKey.decode('utf-8', 'ignore'))
 					else:
 						tmpCont = line.lower()
-						tmpCont.decode('utf-8','ignore')
-						tmpCont.decode('utf-8').encode('ascii','ignore')
+						
+						#tmpCont.encode('ascii', 'ignore')
 						# get tokenized content
-						contWords = nltk.word_tokenize(tmpCont) 
+						contWords = nltk.word_tokenize(tmpCont.decode('utf-8', 'ignore')) 
 
 			subject.append(subjTitle)
 			content.append(contWords)
