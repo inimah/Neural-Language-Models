@@ -129,14 +129,16 @@ if __name__ == '__main__':
 	for i in allMails:
 		mailSentences += allMails[i]
 
-	savePickle(mailSentences,'enr_mailSentences')
-	savePickle(classLabel,'enr_classLabel')
+	#savePickle(mailSentences,'enr_mailSentences')
+	#savePickle(classLabel,'enr_classLabel')
 
 	mailNumSentences = []
 	for i in allNumMails:
 		mailNumSentences += allNumMails[i]
 
-	savePickle(mailNumSentences,'enr_mailNumSentences')
+	#savePickle(mailNumSentences,'enr_mailNumSentences')
+
+	'''
 
 	# word2vec model of mail subjects
 	w2v_cont_enr1, w2v_cont_enr2, w2v_contenr_embed1, w2v_contenr_embed2 = wordEmbedding(subjSentences, mail_vocab, 200, 50)
@@ -163,6 +165,7 @@ if __name__ == '__main__':
 
 	savePickle(avgIDF_contenr_embed1,'avgIDF_contenr_embed1')
 	savePickle(avgIDF_contenr_embed2,'avgIDF_contenr_embed2')
+	'''
 
 	# sentences here can also be considered as document
 	# for document with > 1 sentence, the input is the sequence of words in document

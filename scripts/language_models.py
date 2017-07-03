@@ -148,9 +148,9 @@ def docEmbedding(documents, vocab, argsize, argiter):
 	doc2vec_weights2 = model2.wv.syn0
 	doc2vec_weights3 = model3.wv.syn0
 
-	embedding1 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
-	embedding2 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
-	embedding3 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+	embedding1 = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
+	embedding2 = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
+	embedding3 = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
 
 	for i, w in vocab.items():
 
@@ -403,7 +403,7 @@ def hierarchyTDEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embeddin
 	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(x)
 	# Encoder model
 	# Encodes sentences
-	encoded_sentences = TimeDistributed(LSTM(row_hidden_size, name='lstm_enc_1'))(embedded_sentences)
+	encoded_sentences = TimeDistributed(LSTM(row_hidden_size, name='lstm_enc_1', return_sequences=True))(embedded_sentences)
 	
 	# Encodes documents
 	encoded_docs = LSTM(col_hidden_size, name='lstm_enc_2')(encoded_sentences)

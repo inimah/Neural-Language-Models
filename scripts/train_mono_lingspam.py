@@ -10,27 +10,27 @@ import sys
 import numpy as np
 from text_preprocessing import *
 from language_models import *
+from keras.callbacks import Callback
+from keras.preprocessing.sequence import pad_sequences
+from sklearn.preprocessing import LabelEncoder
 
 
 import argparse
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-batch_size', type=int, default=100)
-ap.add_argument('-layer_num', type=int, default=3)
-ap.add_argument('-hidden_dim', type=int, default=200)
 ap.add_argument('-nb_epoch', type=int, default=20)
 ap.add_argument('-mode', default='train')
 args = vars(ap.parse_args())
 
 
 BATCH_SIZE = args['batch_size']
-LAYER_NUM = args['layer_num']
-HIDDEN_DIM = args['hidden_dim']
 NB_EPOCH = args['nb_epoch']
 MODE = args['mode']
 
 
 PATH = 'prepdata/lingspam'
+EMBED_PATH = 'embedding/lingspam'
 
 
 if __name__ == '__main__':
@@ -184,6 +184,55 @@ if __name__ == '__main__':
 	savePickle(d2v_cont_ls_embed3,'d2v_cont_ls_embed3')
 
 	'''
+
+	class TrainingHistory(Callback):
+		
+		def on_train_begin(self, logs={}):
+			self.losses = []
+			self.acc = []
+			self.i = 0
+			self.save_every = 50
+		def on_batch_end(self, batch, logs={}):
+			self.losses.append(logs.get('loss'))
+			self.acc.append(logs.get('acc'))
+			self.i += 1
+		
+	history = TrainingHistory()
+
+	ls_classLabel = readPickle(os.path.join(PATH,'ls_classLabel'))
+	binEncoder = LabelEncoder()
+	binEncoder.fit(ls_classLabel)
+	yEncoded = binEncoder.transform(ls_classLabel)
+
+	# split document into sentences (and into sequence of numbers)
+	sentencesMail = getSentencesClass(allMails)
+	savePickle(sentencesMail,'ls_sentencesMail')
+	docSentences = sum(sentencesMail,[])
+	# convert into sequence of numbers
+	numSentences = sentToNum(sentencesMail,mail_vocab)
+	savePickle(numSentences,'ls_numSentences')
+	nSentences, nWords, minSent, maxSent, sumSent, avgSent, minWords, maxWords, sumWords, avgWords = getStatClass(numSentences)
+	allNumSentences = sum(numSentences,[])
+
+	#load pretrained embedding weight
+	w2v_contls_embed1 = readPickle(os.path.join(EMBED_PATH,'w2v_contls_embed1'))
+	VOCAB_LENGTH = len(mail_vocab)
+	MAX_SEQUENCE_LENGTH = max(maxWords[0][0],maxWords[1][0])
+	EMBEDDING_DIM = w2v_contls_embed1.shape[1]
+
+	print('[INFO] Zero padding...')
+	X = pad_sequences(allNumSentences, maxlen=MAX_SEQUENCE_LENGTH, dtype='int32')
+
+
+	# create model
+	hierarchyTDClassifier = hierarchyTDClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1,2)
+
+	model.fit(X, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
+
+	model.save('ls_hierarchyTDClassifier.h5')
+	model.save_weights('ls_weights_hierarchyTDClassifier.hdf5')
+	savePickle(ls_history.losses,'history.losses')
+	savePickle(ls_history.acc,'history.acc')
 	
 
 
