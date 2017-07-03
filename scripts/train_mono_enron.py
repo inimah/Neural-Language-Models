@@ -60,16 +60,16 @@ if __name__ == '__main__':
 			classLabel.append(i)
 		subjSentences += allSubjects[i]
 
-	savePickle(subjSentences,'enron_subjSentences')
+	#savePickle(subjSentences,'enr_subjSentences')
 
 	subjNumSentences = []
 	for i in allSubjects:
 		subjNumSentences += allNumSubjects[i]
 
-	savePickle(subjNumSentences,'enron_subjNumSentences')
+	#savePickle(subjNumSentences,'enr_subjNumSentences')
 
 	
-
+	'''
 	# word2vec model of mail subjects
 	w2v_subj_enr1, w2v_subj_enr2, w2v_subjenr_embed1, w2v_subjenr_embed2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
 
@@ -119,10 +119,65 @@ if __name__ == '__main__':
 	savePickle(d2v_subj_enr_embed1,'d2v_subj_enr_embed1')
 	savePickle(d2v_subj_enr_embed2,'d2v_subj_enr_embed2')
 	savePickle(d2v_subj_enr_embed3,'d2v_subj_enr_embed3')
-
+	'''
 
 	## For mail contents
 	#######################################################
+
+
+	mailSentences = []
+	for i in allMails:
+		mailSentences += allMails[i]
+
+	savePickle(mailSentences,'enr_mailSentences')
+	savePickle(classLabel,'enr_classLabel')
+
+	mailNumSentences = []
+	for i in allNumMails:
+		mailNumSentences += allNumMails[i]
+
+	savePickle(mailNumSentences,'enr_mailNumSentences')
+
+	# word2vec model of mail subjects
+	w2v_cont_enr1, w2v_cont_enr2, w2v_contenr_embed1, w2v_contenr_embed2 = wordEmbedding(subjSentences, mail_vocab, 200, 50)
+
+	w2v_cont_enr1.save('w2v_cont_enr1')
+	w2v_cont_enr2.save('w2v_cont_enr2')
+	savePickle(w2v_contenr_embed1,'w2v_contenr_embed1')
+	savePickle(w2v_contenr_embed2,'w2v_contenr_embed2')
+
+
+	# create document representation of word vectors
+
+	# By averaging word vectors
+	avg_contenr_embed1 = averageWE(w2v_cont_enr1, mailSentences)
+	avg_contenr_embed2 = averageWE(w2v_cont_enr2, mailSentences)
+
+	savePickle(avg_contenr_embed1,'avg_contenr_embed1')
+	savePickle(avg_contenr_embed2,'avg_contenr_embed2')
+
+
+	# By averaging and idf weights of word vectors
+	avgIDF_contenr_embed1 = averageIdfWE(w2v_cont_enr1, mail_vocab, mailSentences)
+	avgIDF_contenr_embed2 = averageIdfWE(w2v_cont_enr2, mail_vocab, mailSentences)
+
+	savePickle(avgIDF_contenr_embed1,'avgIDF_contenr_embed1')
+	savePickle(avgIDF_contenr_embed2,'avgIDF_contenr_embed2')
+
+	# sentences here can also be considered as document
+	# for document with > 1 sentence, the input is the sequence of words in document
+	labelledSentences = createLabelledSentences(mailSentences)
+
+	# doc2vec model
+	d2v_cont_enr1, d2v_cont_enr2, d2v_cont_enr3, d2v_cont_enr_embed1, d2v_cont_enr_embed2, d2v_cont_enr_embed3 = docEmbedding(labelledSentences, mail_vocab, 200, 50)
+
+	d2v_cont_enr1.save('d2v_cont_enr1')
+	d2v_cont_enr2.save('d2v_cont_enr2')
+	d2v_cont_enr3.save('d2v_cont_enr3')
+	savePickle(d2v_cont_enr_embed1,'d2v_cont_enr_embed1')
+	savePickle(d2v_cont_enr_embed2,'d2v_cont_enr_embed2')
+	savePickle(d2v_cont_enr_embed3,'d2v_cont_enr_embed3')
+
 	
 
 
