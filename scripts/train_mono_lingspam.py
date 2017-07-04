@@ -169,9 +169,13 @@ if __name__ == '__main__':
 	savePickle(avgIDF_contls_embed1,'avgIDF_contls_embed1')
 	savePickle(avgIDF_contls_embed2,'avgIDF_contls_embed2')
 
+	'''
+
 	# sentences here can also be considered as document
 	# for document with > 1 sentence, the input is the sequence of words in document
-	labelledSentences = createLabelledSentences(mailSentences)
+	#labelledSentences = createLabelledSentences(mailSentences)
+
+	'''
 
 	# doc2vec model
 	d2v_cont_ls1, d2v_cont_ls2, d2v_cont_ls3, d2v_cont_ls_embed1, d2v_cont_ls_embed2, d2v_cont_ls_embed3 = docEmbedding(labelledSentences, mail_vocab, 200, 50)
@@ -183,7 +187,7 @@ if __name__ == '__main__':
 	savePickle(d2v_cont_ls_embed2,'d2v_cont_ls_embed2')
 	savePickle(d2v_cont_ls_embed3,'d2v_cont_ls_embed3')
 
-	'''
+	
 
 	class TrainingHistory(Callback):
 		
@@ -233,6 +237,8 @@ if __name__ == '__main__':
 	model.save_weights('ls_weights_hierarchyTDClassifier.hdf5')
 	savePickle(ls_history.losses,'history.losses')
 	savePickle(ls_history.acc,'history.acc')
+
+	'''
 	
 
 

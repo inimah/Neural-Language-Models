@@ -139,18 +139,18 @@ def docEmbedding(documents, vocab, argsize, argiter):
 	# number of sentences/documents
 	n_examples = len(documents)
 
-	model1.train(documents, total_words=n_tokens, total_examples=n_examples, epochs=argiter)
-	model2.train(documents, total_words=n_tokens, total_examples=n_examples, epochs=argiter)
-	model3.train(documents, total_words=n_tokens, total_examples=n_examples, epochs=argiter)
+	model1.train(documents, total_examples=n_examples, epochs=argiter)
+	model2.train(documents, total_examples=n_examples, epochs=argiter)
+	model3.train(documents, total_examples=n_examples, epochs=argiter)
 
 
 	doc2vec_weights1 = model1.wv.syn0
 	doc2vec_weights2 = model2.wv.syn0
 	doc2vec_weights3 = model3.wv.syn0
 
-	embedding1 = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
-	embedding2 = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
-	embedding3 = np.zeros(shape=(len(vocab)+1, argsize), dtype='float32')
+	embedding1 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+	embedding2 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
+	embedding3 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
 
 	for i, w in vocab.items():
 
@@ -375,6 +375,29 @@ def seqMonoEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_we
 	model.add(TimeDistributed(Dense(VOCAB_LENGTH,name='dense_output')))
 	model.add(Activation('softmax'))
 	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	return model
+
+
+def simpleSeqClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 200
+
+	model = Sequential()
+
+	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
+	model.add(Dropout(0.25))
+
+	model.add(LSTM(hidden_size, name='lstm_enc'))
+	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
+	model.add(LSTM(hidden_size, name='lstm_dec',return_sequences=True))
+
+	model.add(TimeDistributed(Dense(1)))
+	model.add(Activation('sigmoid'))
+
+	model2.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
 	print(model.summary())
 
 	return model
