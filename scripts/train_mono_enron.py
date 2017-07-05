@@ -51,7 +51,7 @@ if __name__ == '__main__':
 	# create WE version of subject using gensim word2vec model
 	# put all subjects into one single array list, with separated class label array
 
-
+	'''
 	classLabel=[]
 	subjSentences = []
 	for i in allSubjects:
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 	#savePickle(subjNumSentences,'enr_subjNumSentences')
 
 	
-	'''
+	
 	# word2vec model of mail subjects
 	w2v_subj_enr1, w2v_subj_enr2, w2v_subjenr_embed1, w2v_subjenr_embed2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
 
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 	savePickle(avgIDF_subjenr_embed1,'avgIDF_subjenr_embed1')
 	savePickle(avgIDF_subjenr_embed2,'avgIDF_subjenr_embed2')
 
-
+	'''
 
 	# doc2vec model of mail subject
 	# labelling sentences with tag sent_id - since gensim doc2vec has different format of input as follows:
@@ -108,10 +108,11 @@ if __name__ == '__main__':
 
 	# sentences here can also be considered as document
 	# for document with > 1 sentence, the input is the sequence of words in document
-	labelledSentences = createLabelledSentences(subjSentences)
+	subjSentences = readPickle(os.path.join(PATH,'enron_subjSentences'))
+	labelledSubjSentences = createLabelledSentences(subjSentences)
 
 	# doc2vec model
-	d2v_subj_enr1, d2v_subj_enr2, d2v_subj_enr3, d2v_subj_enr_embed1, d2v_subj_enr_embed2, d2v_subj_enr_embed3 = docEmbedding(labelledSentences, subject_vocab, 200, 50)
+	d2v_subj_enr1, d2v_subj_enr2, d2v_subj_enr3, d2v_subj_enr_embed1, d2v_subj_enr_embed2, d2v_subj_enr_embed3 = docEmbedding(labelledSubjSentences, subject_vocab, 200, 50)
 
 	d2v_subj_enr1.save('d2v_subj_enr1')
 	d2v_subj_enr2.save('d2v_subj_enr2')
@@ -119,6 +120,7 @@ if __name__ == '__main__':
 	savePickle(d2v_subj_enr_embed1,'d2v_subj_enr_embed1')
 	savePickle(d2v_subj_enr_embed2,'d2v_subj_enr_embed2')
 	savePickle(d2v_subj_enr_embed3,'d2v_subj_enr_embed3')
+	
 	'''
 
 	## For mail contents
@@ -138,7 +140,7 @@ if __name__ == '__main__':
 
 	#savePickle(mailNumSentences,'enr_mailNumSentences')
 
-	'''
+	
 
 	# word2vec model of mail subjects
 	w2v_cont_enr1, w2v_cont_enr2, w2v_contenr_embed1, w2v_contenr_embed2 = wordEmbedding(subjSentences, mail_vocab, 200, 50)
@@ -169,10 +171,11 @@ if __name__ == '__main__':
 
 	# sentences here can also be considered as document
 	# for document with > 1 sentence, the input is the sequence of words in document
-	labelledSentences = createLabelledSentences(mailSentences)
+	mailSentences = readPickle(os.path.join(PATH,'enr_mailSentences'))
+	labelledMailSentences = createLabelledSentences(mailSentences)
 
 	# doc2vec model
-	d2v_cont_enr1, d2v_cont_enr2, d2v_cont_enr3, d2v_cont_enr_embed1, d2v_cont_enr_embed2, d2v_cont_enr_embed3 = docEmbedding(labelledSentences, mail_vocab, 200, 50)
+	d2v_cont_enr1, d2v_cont_enr2, d2v_cont_enr3, d2v_cont_enr_embed1, d2v_cont_enr_embed2, d2v_cont_enr_embed3 = docEmbedding(labelledMailSentences, mail_vocab, 200, 50)
 
 	d2v_cont_enr1.save('d2v_cont_enr1')
 	d2v_cont_enr2.save('d2v_cont_enr2')

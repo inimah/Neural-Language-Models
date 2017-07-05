@@ -45,13 +45,16 @@ if __name__ == '__main__':
 	allNumMails = readPickle(os.path.join(PATH,'allNumMails'))
 
 	
+	
+
+	
 
 	## For mail subject (short text part of mail)
 	#######################################################
 	# create WE version of subject using gensim word2vec model
 	# put all subjects into one single array list, with separated class label array
 
-
+	'''
 	classLabel=[]
 	subjSentences = []
 	for i in allSubjects:
@@ -68,7 +71,7 @@ if __name__ == '__main__':
 
 	#savePickle(subjNumSentences,'ls_subjNumSentences')
 
-	'''
+	
 
 	# word2vec model of mail subjects
 	w2v_subj_ls1, w2v_subj_ls2, w2v_subjls_embed1, w2v_subjls_embed2 = wordEmbedding(subjSentences, subject_vocab, 200, 50)
@@ -96,7 +99,7 @@ if __name__ == '__main__':
 	savePickle(avgIDF_subjls_embed1,'avgIDF_subjls_embed1')
 	savePickle(avgIDF_subjls_embed2,'avgIDF_subjls_embed2')
 
-
+	'''
 
 	# doc2vec model of mail subject
 	# labelling sentences with tag sent_id - since gensim doc2vec has different format of input as follows:
@@ -108,10 +111,13 @@ if __name__ == '__main__':
 
 	# sentences here can also be considered as document
 	# for document with > 1 sentence, the input is the sequence of words in document
-	labelledSentences = createLabelledSentences(subjSentences)
+	subjSentences = readPickle(os.path.join(PATH,'ls_subjSentences'))
+	labelledSubjSentences = createLabelledSentences(subjSentences)
 
 	# doc2vec model
-	d2v_subj_ls1, d2v_subj_ls2, d2v_subj_ls3, d2v_subj_ls_embed1, d2v_subj_ls_embed2, d2v_subj_ls_embed3 = docEmbedding(labelledSentences, subject_vocab, 200, 50)
+	d2v_subj_ls1, d2v_subj_ls2, d2v_subj_ls3, d2v_subj_ls_embed1, d2v_subj_ls_embed2, d2v_subj_ls_embed3 = docEmbedding(labelledSubjSentences, subject_vocab, 200, 50)
+
+	
 
 	d2v_subj_ls1.save('d2v_subj_ls1')
 	d2v_subj_ls2.save('d2v_subj_ls2')
@@ -142,7 +148,7 @@ if __name__ == '__main__':
 
 	#savePickle(mailNumSentences,'ls_mailNumSentences')
 
-	'''
+	
 
 	# word2vec model of mail contents
 	w2v_cont_ls1, w2v_cont_ls2, w2v_contls_embed1, w2v_contls_embed2 = wordEmbedding(mailSentences, mail_vocab, 200, 50)
@@ -173,21 +179,28 @@ if __name__ == '__main__':
 
 	# sentences here can also be considered as document
 	# for document with > 1 sentence, the input is the sequence of words in document
-	#labelledSentences = createLabelledSentences(mailSentences)
 
-	'''
+	mailSentences = readPickle(os.path.join(PATH,'ls_mailSentences'))
+
+	labelledMailSentences = createLabelledSentences(mailSentences)
+
+	
 
 	# doc2vec model
-	d2v_cont_ls1, d2v_cont_ls2, d2v_cont_ls3, d2v_cont_ls_embed1, d2v_cont_ls_embed2, d2v_cont_ls_embed3 = docEmbedding(labelledSentences, mail_vocab, 200, 50)
+	d2v_cont_ls1, d2v_cont_ls2, d2v_cont_ls3, d2v_cont_ls_embed1, d2v_cont_ls_embed2, d2v_cont_ls_embed3 = docEmbedding(labelledMailSentences, mail_vocab, 200, 50)
 
 	d2v_cont_ls1.save('d2v_cont_ls1')
 	d2v_cont_ls2.save('d2v_cont_ls2')
 	d2v_cont_ls3.save('d2v_cont_ls3')
+	
 	savePickle(d2v_cont_ls_embed1,'d2v_cont_ls_embed1')
 	savePickle(d2v_cont_ls_embed2,'d2v_cont_ls_embed2')
 	savePickle(d2v_cont_ls_embed3,'d2v_cont_ls_embed3')
 
+
 	
+
+	'''
 
 	class TrainingHistory(Callback):
 		
@@ -228,6 +241,8 @@ if __name__ == '__main__':
 	X = pad_sequences(allNumSentences, maxlen=MAX_SEQUENCE_LENGTH, dtype='int32')
 
 
+	
+
 	# create model
 	hierarchyTDClassifier = hierarchyTDClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1,2)
 
@@ -239,6 +254,8 @@ if __name__ == '__main__':
 	savePickle(ls_history.acc,'history.acc')
 
 	'''
+
+	
 	
 
 

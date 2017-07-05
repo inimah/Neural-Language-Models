@@ -144,31 +144,11 @@ def docEmbedding(documents, vocab, argsize, argiter):
 	model3.train(documents, total_examples=n_examples, epochs=argiter)
 
 
-	doc2vec_weights1 = model1.wv.syn0
-	doc2vec_weights2 = model2.wv.syn0
-	doc2vec_weights3 = model3.wv.syn0
+	doc2vec_weights1 = np.array(model1.docvecs)
+	doc2vec_weights2 = np.array(model2.docvecs)
+	doc2vec_weights3 = np.array(model3.docvecs)
 
-	embedding1 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
-	embedding2 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
-	embedding3 = np.zeros(shape=(len(vocab), argsize), dtype='float32')
-
-	for i, w in vocab.items():
-
-		if w not in doc2vec_vocab1:
-			continue
-		embedding1[i, :] = doc2vec_weights1[doc2vec_vocab1[w], :]
-
-
-		if w not in doc2vec_vocab2:
-			continue
-		embedding2[i, :] = doc2vec_weights2[doc2vec_vocab2[w], :]
-
-		if w not in doc2vec_vocab3:
-			continue
-		embedding3[i, :] = doc2vec_weights3[doc2vec_vocab3[w], :]
-	
-	
-	return model1, model2, model3, embedding1, embedding2, embedding3
+	return model1, model2, model3, doc2vec_weights1, doc2vec_weights2, doc2vec_weights3
 
 
 ################################################
@@ -391,12 +371,15 @@ def simpleSeqClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedd
 
 	model.add(LSTM(hidden_size, name='lstm_enc'))
 	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
-	model.add(LSTM(hidden_size, name='lstm_dec',return_sequences=True))
+	#model.add(LSTM(hidden_size, name='lstm_dec',return_sequences=True))
 
-	model.add(TimeDistributed(Dense(1)))
+	model.add(LSTM(hidden_size, name='lstm_dec'))
+	model.add(Dense(1))
+
+	#model.add(TimeDistributed(Dense(1)))
 	model.add(Activation('sigmoid'))
 
-	model2.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
 	print(model.summary())
 

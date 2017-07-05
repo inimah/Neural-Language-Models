@@ -279,6 +279,102 @@ def generateDocVocab(documents):
 
 	return words, docsents, vocab
 
+def generateDocMail(documents):
+
+	
+	subj = dict()
+	cont = dict()
+
+	allSubj = dict()
+	allCont = dict()
+	
+
+	for k in datadictionary:
+		subject = []
+		content = []
+		for mail in datadictionary[k]:
+			subjTitle = []
+			contWords = []
+			
+			with open(mail) as f:
+				for i,line in enumerate(f):		
+					if i == 0:
+						tmpSubj = line
+						# get tokenized subject title
+						lSubj = tmpSubj.lower()
+						keyword = 'subject:'
+						# get title after keyword
+						beforeKey, inKey, afterKey = lSubj.partition(keyword)
+						
+						#afterKey.encode('ascii', 'ignore')
+						# tokenize
+						subjTitle = nltk.word_tokenize(afterKey.decode('utf-8', 'ignore'))
+					else:
+						tmpCont = line.lower()
+						
+						#tmpCont.encode('ascii', 'ignore')
+						# get tokenized content
+						contWords = nltk.word_tokenize(tmpCont.decode('utf-8', 'ignore')) 
+
+			subject.append(subjTitle)
+			content.append(contWords)
+
+		# escape unicode characters if anys - transform to string format of text
+		strSubj = convert(subject)
+		strCont = convert(content)
+
+		# these are tokenized words for subject and content of mail
+		subj[k] = strSubj
+		cont[k] = strCont
+
+	# generate tokens from subject title
+	subjTokens = [value for key, value in subj.items()]
+	subjAllTokens = sum(subjTokens,[])
+
+	# frequency of word across document corpus
+	subjFreq = nltk.FreqDist(itertools.chain(*subjAllTokens)) 
+	subjUnique = subjFreq.keys()
+	# add 'zero' as the first vocab and 'UNK' as unknown words
+	subjUnique.insert(0,'zerostart')
+	subjUnique.append('EOF')
+	subjUnique.append('UNK')
+	# indexing word vocabulary : pairs of (index,word)
+	subjVocab=dict([(i,subjUnique[i]) for i in range(len(subjUnique))])
+	
+	# generate tokens from mail contents
+	contentTokens = [value for key, value in cont.items()]
+	contentAllTokens = sum(contentTokens,[])
+
+	# frequency of word across document corpus
+	contFreq = nltk.FreqDist(itertools.chain(*contentAllTokens)) 
+	contUnique = contFreq.keys()
+	# add 'zero' as the first vocab and 'UNK' as unknown words
+	contUnique.insert(0,'zerostart')
+	contUnique.append('EOF')
+	contUnique.append('UNK')
+	# indexing word vocabulary : pairs of (index,word)
+	contVocab=dict([(i,contUnique[i]) for i in range(len(contUnique))])
+	
+
+	# encode tokenized of words in document into its index/numerical val. in vocabulary list
+	# for subject
+	for k in subj:
+		numericSubj =[]
+		for i in range(len(subj[k])):
+			numericSubj.append(wordsToIndex(subjVocab,subj[k][i]))
+		allSubj[k] = numericSubj
+
+
+	# for content of mail 
+	for k in cont:
+		numericCont =[]
+		for i in range(len(cont[k])):
+			numericCont.append(wordsToIndex(contVocab,cont[k][i]))
+		allCont[k] = numericCont
+
+
+	return subjVocab, contVocab, subj, cont, allSubj, allCont
+
 # creating word vocabulary and training sets for bi-lingual corpora pairs
 # text documents need to be stored in their corresponding language folders (eg: en, nl)
 ################################################
