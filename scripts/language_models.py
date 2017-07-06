@@ -334,7 +334,33 @@ def seqParallelEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM
 # train on short text monolingual data (single sentence)
 
 ################################################
-def seqMonoEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def seqMonoEncDec1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 200
+	num_layers = 3
+
+	model = Sequential()
+	
+	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
+
+	# Creating encoder network
+	# encoding text input (sequence of words) into sentence embedding
+	model.add(LSTM(hidden_size,name='lstm_enc_1'))
+	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
+
+	# Creating decoder network
+	# objective function: predicting next words (language model)
+	model.add(LSTM(hidden_size, name='lstm_dec2', return_sequences=True))
+	model.add(LSTM(hidden_size, name='lstm_dec3', return_sequences=False))
+	model.add(Dense(VOCAB_LENGTH,name='dense_output'))
+	model.add(Activation('softmax'))
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	return model
+
+
+def seqMonoEncDec2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 200
 	num_layers = 3
