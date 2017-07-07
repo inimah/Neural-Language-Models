@@ -334,33 +334,9 @@ def seqParallelEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM
 # train on short text monolingual data (single sentence)
 
 ################################################
-def seqMonoEncDec1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
-
-	hidden_size = 200
-	num_layers = 3
-
-	model = Sequential()
-	
-	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
-
-	# Creating encoder network
-	# encoding text input (sequence of words) into sentence embedding
-	model.add(LSTM(hidden_size,name='lstm_enc_1'))
-	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
-
-	# Creating decoder network
-	# objective function: predicting next words (language model)
-	model.add(LSTM(hidden_size, name='lstm_dec2', return_sequences=True))
-	model.add(LSTM(hidden_size, name='lstm_dec3', return_sequences=False))
-	model.add(Dense(VOCAB_LENGTH,name='dense_output'))
-	model.add(Activation('softmax'))
-	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-	print(model.summary())
-
-	return model
 
 
-def seqMonoEncDec2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def seqMonoEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 200
 	num_layers = 3
@@ -401,6 +377,33 @@ def simpleSeqClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedd
 
 	model.add(LSTM(hidden_size, name='lstm_dec'))
 	model.add(Dense(1))
+
+	#model.add(TimeDistributed(Dense(1)))
+	model.add(Activation('sigmoid'))
+
+	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+	print(model.summary())
+
+	return model
+
+# with time-distributed layer
+# return all time steps in previous layer
+def simpleSeqClassifier2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 200
+
+	model = Sequential()
+
+	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
+	model.add(Dropout(0.25))
+
+	model.add(LSTM(hidden_size, name='lstm_enc'))
+	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
+	#model.add(LSTM(hidden_size, name='lstm_dec',return_sequences=True))
+
+	model.add(LSTM(hidden_size, name='lstm_dec',return_sequences=True))
+	model.add(TimeDistributed(Dense(1)))
 
 	#model.add(TimeDistributed(Dense(1)))
 	model.add(Activation('sigmoid'))

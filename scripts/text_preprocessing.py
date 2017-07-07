@@ -655,6 +655,7 @@ def classMinMaxAvgLength(datadict):
 
 # maximum, minimum, and average word length for whole document corpus
 # return scalar values 
+# the input is datadictionary
 def getMinMaxAvgLength(datadict):
 	minArr = []
 	maxArr = []
@@ -671,6 +672,24 @@ def getMinMaxAvgLength(datadict):
 	avglength = sum(avgArr)/n
 
 	return minlength, maxlength, avglength
+
+
+# the input is aray list of documents (with single sentence or sequence of words)
+# either sentences in numerical or text string format 
+def calcSentencesStats(arraySentences):
+
+	minArr = []
+	maxArr = []
+	avgArr = []
+	ndocs = []
+	n_sentences = len(arraySentences)
+	
+	minlength = min(len(sent) for sent in arraySentences)
+	maxlength = max(len(sent) for sent in arraySentences)
+	avglength = sum((len(sent) for sent in arraySentences)) / n_sentences
+	
+
+	return minlength, maxlength, avglength 
 
 # return array of sentences / documents w.r.t classes
 # the length of array represents number of classes in document corpus
