@@ -251,7 +251,7 @@ def averageIdfWE(word2vec_model, vocab, documents):
 # for single document with multiple sentences
 # encoding sentences -> create sentence embedding
 ################################################
-def seqEncDec(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM, embedding_weights):
+def translationModel(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 200
 	num_layers = 3
@@ -336,7 +336,7 @@ def seqParallelEnc(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_DIM
 ################################################
 
 
-def seqMonoEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def languageModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 200
 	num_layers = 3
@@ -362,7 +362,7 @@ def seqMonoEncDec(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_we
 	return model
 
 
-def simpleSeqClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def classificationModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 200
 

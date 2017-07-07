@@ -59,43 +59,45 @@ if __name__ == '__main__':
 	allNumSubjects = readPickle(os.path.join(PATH, 'allNumSubjects'))
 	allNumMails = readPickle(os.path.join(PATH,'allNumMails'))
 
-	subjSentences = readPickle(os.path.join(PATH,'ls_subjSentences'))
-	numSentences = readPickle(os.path.join(PATH,'ls_subjNumSentences'))
+	ls_classLabel = readPickle(os.path.join(PATH,'ls_classLabel'))
+	binEncoder = LabelEncoder()
+	binEncoder.fit(ls_classLabel)
+	yEncoded = binEncoder.transform(ls_classLabel)
 
 	
-	# By NLM-Language Model
-	####################
+	## For mail contents
+	#######################################################
 	
+
+	mailSentences = readPickle(os.path.join(PATH,'ls_mailSentences'))
+	numSentences = readPickle(os.path.join(PATH,'ls_mailNumSentences'))
+
 	#load pretrained embedding weight
-	w2v_subjls_embed1 = readPickle(os.path.join(EMBED_PATH,'w2v_subjls_embed1'))
-	VOCAB_LENGTH = len(subject_vocab)
+	w2v_contls_embed1 = readPickle(os.path.join(EMBED_PATH,'w2v_contls_embed1'))
+	VOCAB_LENGTH = len(mail_vocab)
 	
-	EMBEDDING_DIM = w2v_subjls_embed1.shape[1]
+	EMBEDDING_DIM = w2v_contls_embed1.shape[1]
 
 	minlength, maxlength, avglength = calcSentencesStats(numSentences)
 
 	MAX_SEQUENCE_LENGTH = maxlength
 
-	x_train = numSentences[:-1]
-	y_train = numSentences[1:]
-
 	print('[INFO] Zero padding...')
-	X = pad_sequences(x_train, maxlen=MAX_SEQUENCE_LENGTH, dtype='int32')
+	X = pad_sequences(numSentences, maxlen=MAX_SEQUENCE_LENGTH, dtype='int32')
 
 	# create model
-
-	yEncoded = sentenceMatrixVectorization(y_train,MAX_SEQUENCE_LENGTH,VOCAB_LENGTH)
-	saveH5File('ls_subj_yEncoded.h5','yEncoded',yEncoded)
-
-	model = languageModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_subjls_embed1)
+	model = classificationModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1)
 
 	model.fit(X, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
 
-	model.save('ls_subj_LM.h5')
-	model.save_weights('ls_subj_weights_LM.hdf5')
-	savePickle(history.losses,'ls_subj_LM_history.losses')
-	savePickle(history.acc,'ls_subj_LM_history.acc')
+	model.save('ls_cont_CM.h5')
+	model.save_weights('ls_cont_weights_CM.hdf5')
+	savePickle(history.losses,'ls_cont_CM_history.losses')
+	savePickle(history.acc,'ls_cont_CM_history.acc')
 
-	encoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_enc_1').output)
+	encoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_enc').output)
 	encoded_subj = encoderSubj.predict(X)
-	savePickle(encoded_subj,'ls_subj_encoded_LM')
+	savePickle(encoded_subj,'ls_subj_encoded_CM')
+
+
+

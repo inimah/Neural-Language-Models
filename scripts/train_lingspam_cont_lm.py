@@ -59,18 +59,19 @@ if __name__ == '__main__':
 	allNumSubjects = readPickle(os.path.join(PATH, 'allNumSubjects'))
 	allNumMails = readPickle(os.path.join(PATH,'allNumMails'))
 
-	subjSentences = readPickle(os.path.join(PATH,'ls_subjSentences'))
-	numSentences = readPickle(os.path.join(PATH,'ls_subjNumSentences'))
+	
+	## For mail contents
+	#######################################################
+	
 
-	
-	# By NLM-Language Model
-	####################
-	
+	mailSentences = readPickle(os.path.join(PATH,'ls_mailSentences'))
+	numSentences = readPickle(os.path.join(PATH,'ls_mailNumSentences'))
+
 	#load pretrained embedding weight
-	w2v_subjls_embed1 = readPickle(os.path.join(EMBED_PATH,'w2v_subjls_embed1'))
-	VOCAB_LENGTH = len(subject_vocab)
+	w2v_contls_embed1 = readPickle(os.path.join(EMBED_PATH,'w2v_contls_embed1'))
+	VOCAB_LENGTH = len(mail_vocab)
 	
-	EMBEDDING_DIM = w2v_subjls_embed1.shape[1]
+	EMBEDDING_DIM = w2v_contls_embed1.shape[1]
 
 	minlength, maxlength, avglength = calcSentencesStats(numSentences)
 
@@ -84,18 +85,47 @@ if __name__ == '__main__':
 
 	# create model
 
-	yEncoded = sentenceMatrixVectorization(y_train,MAX_SEQUENCE_LENGTH,VOCAB_LENGTH)
-	saveH5File('ls_subj_yEncoded.h5','yEncoded',yEncoded)
+	model = languageModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1)
 
-	model = languageModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_subjls_embed1)
+	# train model in batch to avoid memory error
 
-	model.fit(X, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
+	_start = 1
+	mini_batches = 100
+	loss = []
+	acc = []
 
-	model.save('ls_subj_LM.h5')
-	model.save_weights('ls_subj_weights_LM.hdf5')
-	savePickle(history.losses,'ls_subj_LM_history.losses')
-	savePickle(history.acc,'ls_subj_LM_history.acc')
+	for k in range(_start, NB_EPOCH+1):
+		i_loss = []
+		i_acc = []
+		for i in range(0, len(X), mini_batches):
+			if i + mini_batches >= len(X):
+				i_end = len(X)
+			else:
+				i_end = i + mini_batches
 
-	encoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_enc_1').output)
-	encoded_subj = encoderSubj.predict(X)
-	savePickle(encoded_subj,'ls_subj_encoded_LM')
+
+			yEncoded = sentenceMatrixVectorization(y_train[i:i_end],MAX_SEQUENCE_LENGTH,VOCAB_LENGTH)
+
+			print('[INFO] Training model: epoch {}th {}/{} samples'.format(k, i, len(X)))
+
+			model.fit(X[i:i_end], yEncoded, batch_size=BATCH_SIZE, nb_epoch=1, callbacks=[history])
+
+			i_loss.append(history.losses)
+			i_acc.append(history.acc)
+
+		model.save_weights('ls_cont_weights_LM_{}.hdf5'.format(k))
+		loss.append(i_loss)
+		acc.append(i_acc)
+
+
+
+	model.save('ls_cont_LM.h5')
+	
+	savePickle(loss,'ls_cont_LM_history.losses')
+	savePickle(acc,'ls_cont_LM_history.acc')
+
+	encoderCont = Model(inputs=model.input, outputs=model.get_layer('lstm_enc_1').output)
+	encodedCont = encoderCont.predict(X)
+	savePickle(encodedCont,'ls_cont_encoded_LM')
+
+

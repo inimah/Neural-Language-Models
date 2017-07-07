@@ -85,7 +85,7 @@ if __name__ == '__main__':
 	X = pad_sequences(numSentences, maxlen=MAX_SEQUENCE_LENGTH, dtype='int32')
 
 	# create model
-	model = simpleSeqClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_subjls_embed1)
+	model = classificationModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_subjls_embed1)
 
 	model.fit(X, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
 
