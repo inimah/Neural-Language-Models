@@ -389,12 +389,38 @@ def hierarchyLanguage(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embeddin
 ################################################
 # Hierarchical Neural Classification Model 
 #
-# input array for this model is in 4D shape
+# input array for this model is in 4D shape (after embedding layer)
 # ( cols,       rows,     time_steps,    n_dim     )
 # ( _____   ___________   _________   ____________ )
 # ( n_docs, n_sentences,   n_words    dim_embedding)
 ################################################
-def hierarchyClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
+def hierarchyClassifier1(MAX_SENTENCES, MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
+
+	
+	row_hidden_size = 200
+	col_hidden_size = 200
+
+	if num_classes > 2:
+		loss_function = 'categorical_crossentropy'
+	else:
+		loss_function = 'binary_crossentropy'
+
+	sentences_input = Input(shape=(MAX_SENTENCES,MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sentences_input)
+	lstm_sentence = TimeDistributed(LSTM(row_hidden_size,name='lstm_enc_1'))(embedded_sentences)
+	
+	docs_model = LSTM(col_hidden_size,name='lstm_enc_2')(lstm_sentence)
+
+	# Prediction
+	prediction = Dense(num_classes, activation='softmax', name='dense_out')(docs_model)
+	model = Model(sentences_input, prediction)
+	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+
+	return model
+
+def hierarchyClassifier2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
 
 	n_docs = 1
 	row_hidden_size = 200

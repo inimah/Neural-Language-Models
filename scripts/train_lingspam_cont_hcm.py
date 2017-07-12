@@ -7,6 +7,7 @@
 from __future__ import print_function
 import os
 import sys
+import string
 import numpy as np
 from text_preprocessing import *
 from language_models import *
@@ -60,17 +61,100 @@ if __name__ == '__main__':
 	allNumMails = readPickle(os.path.join(PATH,'allNumMails'))
 
 	ls_classLabel = readPickle(os.path.join(PATH,'ls_classLabel'))
+	label = ls_classLabel[:500]
 	binEncoder = LabelEncoder()
-	binEncoder.fit(ls_classLabel)
-	yEncoded = binEncoder.transform(ls_classLabel)
+	binEncoder.fit(label)
+	yEncoded = binEncoder.transform(label)
 
 	
 	## For mail contents
 	#######################################################
 	
-
+	'''
 	mailSentences = readPickle(os.path.join(PATH,'ls_mailSentences'))
 	numSentences = readPickle(os.path.join(PATH,'ls_mailNumSentences'))
+
+	# splitting documents into sentences
+	sentences = []
+	for i in range(len(mailSentences)):
+		sentences.append(splitSentences(mailSentences[i]))
+
+	# cleaning from punctuations - including consecutive duplicates of punctuation
+	# sentences[2347][91]
+	newSent=[]
+	for sent in sentences:
+		tmp1 = []
+		for words in sent:
+			tmp2 = []
+			for word in words:
+				if word not in string.punctuation:
+					tmp2.append(word)
+			tmp1.append(tmp2)
+		newSent.append(tmp1)
+
+
+	savePickle(sentences,'ls_mailSplitSent')
+	savePickle(newSent,'ls_mailCleanSent')
+
+	'''
+
+	numSentences = readPickle('ls_mail500Num')
+
+	n_samples = len(numSentences)
+
+	# max number of sentences in documents
+	MAX_SENTENCES = max([len(sent) for sent in numSentences])
+	# sentences.index(max(sent for sent in sentences)) --> the index of document with the longest sentence
+	# max length of words per sentence
+	MAX_SEQUENCE_LENGTH = max([max(len(s) for s in sent) for sent in numSentences])
+
+	'''
+
+	In [4]: tmp = []
+   ...: for sent in newSent:
+   ...:     tmp1=[]
+   ...:     for words in sent:
+   ...:         tmp1.append(len(words))        
+   ...:     tmp.append(tmp1)
+
+
+	In [12]: for i in range(len(tmp)):
+	...:     for j in range(len(tmp[i])):
+	...:         if tmp[i][j]==394:
+	...:             print(i,j)
+	...:             
+	(807, 11)
+
+	In [15]: tmpSent = newSent[:500]
+
+	In [16]: numSent = []
+
+	In [17]: for i in range(len(tmpSent)):
+		...:     tmp = []
+		...:     for j in range(len(tmpSent[i])):
+		...:         tmp.append(wordsToIndex(mail_vocab,tmpSent[i][j]))
+		...:     numSent.append(tmp)
+		...: 
+
+
+
+	In [18]: 
+
+	In [18]: 
+
+	In [18]: len(numSent)
+	Out[18]: 500
+
+
+	# transform into numerical sequence values
+	numSent = []
+	for i in range(len(newSent)):
+		tmp = []
+		for j in range(len(newSent[i])):
+			tmp.append(wordsToIndex(mail_vocab,newSent[i][j]))
+		numSent.append(tmp)
+
+	'''
 
 	#load pretrained embedding weight
 	w2v_contls_embed1 = readPickle(os.path.join(EMBED_PATH,'w2v_contls_embed1'))
@@ -78,17 +162,24 @@ if __name__ == '__main__':
 	
 	EMBEDDING_DIM = w2v_contls_embed1.shape[1]
 
-	minlength, maxlength, avglength = calcSentencesStats(numSentences)
-
-	MAX_SEQUENCE_LENGTH = maxlength
+	# Get maximum number of sentences in document and maximum word length per sentence
 
 	print('[INFO] Zero padding...')
-	X = pad_sequences(numSentences, maxlen=MAX_SEQUENCE_LENGTH, dtype='int32')
+	X = []
+	for words in numSentences:
+		X.append(pad_sequences(words, maxlen=MAX_SEQUENCE_LENGTH, dtype='int64'))
+
+	X_train=np.zeros((n_samples,MAX_SENTENCES,MAX_SEQUENCE_LENGTH))   
+	for i in range(len(X)):
+		for j in range(len(X[i])):
+			X_train[i][j]=X[i][j]
+
+
 
 	# create model
-	model = hierarchyClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1,2)
+	model = hierarchyClassifier1(MAX_SENTENCES,MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1,2)
 
-	model.fit(X, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
+	model.fit(X_train, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
 
 	model.save('ls_cont_HCM.h5')
 	model.save_weights('ls_cont_weights_HCM.hdf5')
@@ -97,7 +188,8 @@ if __name__ == '__main__':
 
 	encoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_enc_1').output)
 	encoded_subj = encoderSubj.predict(X)
-	savePickle(encoded_subj,'ls_subj_encoded_HCM')
+	savePickle(encoded_subj,'ls_cont_encoded_HCM')
 
+	
 
 

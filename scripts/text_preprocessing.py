@@ -610,7 +610,7 @@ def generateMailVocab(datadictionary):
 ################################################
 def endOfSentence(i, docTokens):
 	
-	return docTokens[i] in ('.','?','!') and (i == len(docTokens) - 1 or not docTokens[i+1] in ('.','?','!'))
+	return docTokens[i] in ('.','?','!', ';',':','*','``') and (i == len(docTokens) - 1 or not docTokens[i+1] in ('.','?','!', ';', ':','*','``'))
 
 
 
@@ -690,6 +690,7 @@ def calcSentencesStats(arraySentences):
 	
 
 	return minlength, maxlength, avglength 
+
 
 # return array of sentences / documents w.r.t classes
 # the length of array represents number of classes in document corpus
@@ -858,6 +859,16 @@ def sequenceToStr(wordSentences):
 	return strSentences
 	
 
+# for tokenized string text
+def printDoc(sentences):
+
+	joinedStr = ' '.join(str(e) for e in sentences)
+	print(joinedStr)
+
+	return joinedStr
+
+
+
 
 def printSentencesClass(classid, docid, sentid, sentences):
 	for i in range(len(sentences)):
@@ -868,6 +879,9 @@ def printSentencesClass(classid, docid, sentid, sentences):
 						if k == sentid:
 							for txt in sentences[i][j][k]:
 								print('%s ' %txt,end='') 
+
+
+
 
 
 # get statistics (number of sentences per document, number of words per sentence) for each class 

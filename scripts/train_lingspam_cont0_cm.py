@@ -60,9 +60,10 @@ if __name__ == '__main__':
 	allNumMails = readPickle(os.path.join(PATH,'allNumMails'))
 
 	ls_classLabel = readPickle(os.path.join(PATH,'ls_classLabel'))
+	label = ls_classLabel[:200]
 	binEncoder = LabelEncoder()
-	binEncoder.fit(ls_classLabel)
-	yEncoded = binEncoder.transform(ls_classLabel)
+	binEncoder.fit(label)
+	yEncoded = binEncoder.transform(label)
 
 	
 	## For mail contents
@@ -110,73 +111,21 @@ if __name__ == '__main__':
 	print('[INFO] Zero padding...')
 	X = pad_sequences(x_train, maxlen=MAX_SEQUENCE_LENGTH, dtype='int32')
 
-	# compare the model training by sampling 200 words (time-steps) from either the front or end of list
-	# or the whole sequence
-	# this is also to speed-up computation
-
-	_start = 200
-	_mid = (n_samples/2)-100
-
 	
-
-
-	# 1. samples the first n-time steps array list
-	X_samples1 = np.zeros((n_samples,TIME_STEPS))
-	for i in range(len(X)):
-		X_samples1[i]=X[i][:_start]
-
-	# 2. samples the last n-time steps array list
-	X_samples2 = np.zeros((n_samples,TIME_STEPS))
-	for i in range(len(X)):
-		X_samples2[i]=X[i][-_start:]
-
-	# 3. samples the middle n-time steps array list
-	X_samples3 = np.zeros((n_samples,TIME_STEPS))
-	for i in range(len(X)):
-		X_samples3[i]=X[i][mid:_start]
-
-	# shuffling the sampling order - whether from start, middle, or end of sentence array
-	X_4 = []
-
-	mini_batches = 100
-	dice = np.arange(3)
-	
-	# shuffling the sampling method every mini batches (100 samples)
-
-	for i in range(0, len(X), mini_batches):
-		if i + mini_batches >= len(X):
-			i_end = len(X)
-		else:
-			i_end = i + mini_batches 
-
-		x_seq = X[i:i_end]
-		np.random.shuffle(dice) 	
-		if (dice[0] == 0):
-			X_sample = X[:][:_start]
-		elif (dice[0] == 1):
-			X_sample = X[:][-_start:]
-		else:
-			X_sample = X[:][mid:_start]
-
-		X_4.append(X_sample)
-	X_sample4 = np.array(X_4)
-
-
-
 
 	# create model
-	model = classificationModel(TIME_STEPS, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1)
+	model = classificationModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1)
 
 	model.fit(X, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
 
-	model.save('ls_cont_CM.h5')
-	model.save_weights('ls_cont_weights_CM.hdf5')
-	savePickle(history.losses,'ls_cont_CM_history.losses')
-	savePickle(history.acc,'ls_cont_CM_history.acc')
+	model.save('ls_cont4_CM.h5')
+	model.save_weights('ls_cont4_weights_CM.hdf5')
+	savePickle(history.losses,'ls_cont4_CM_history.losses')
+	savePickle(history.acc,'ls_cont4_CM_history.acc')
 
 	encoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_enc').output)
 	encoded_subj = encoderSubj.predict(X)
-	savePickle(encoded_subj,'ls_subj_encoded_CM')
+	savePickle(encoded_subj,'ls_cont4_encoded_CM')
 
 
 

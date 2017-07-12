@@ -60,9 +60,10 @@ if __name__ == '__main__':
 	allNumMails = readPickle(os.path.join(PATH,'allNumMails'))
 
 	ls_classLabel = readPickle(os.path.join(PATH,'ls_classLabel'))
+	label = ls_classLabel[:200]
 	binEncoder = LabelEncoder()
-	binEncoder.fit(ls_classLabel)
-	yEncoded = binEncoder.transform(ls_classLabel)
+	binEncoder.fit(label)
+	yEncoded = binEncoder.transform(label)
 
 	
 	## For mail contents
@@ -125,6 +126,9 @@ if __name__ == '__main__':
 	for i in range(len(X)):
 		X_samples1[i]=X[i][:_start]
 
+
+	'''
+
 	# 2. samples the last n-time steps array list
 	X_samples2 = np.zeros((n_samples,TIME_STEPS))
 	for i in range(len(X)):
@@ -159,24 +163,24 @@ if __name__ == '__main__':
 			X_sample = X[:][mid:_start]
 
 		X_4.append(X_sample)
-	X_sample4 = np.array(X_4)
+	X_samples4 = np.array(X_4)
 
-
+	'''
 
 
 	# create model
 	model = classificationModel(TIME_STEPS, VOCAB_LENGTH, EMBEDDING_DIM, w2v_contls_embed1)
 
-	model.fit(X, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
+	model.fit(X_samples1, yEncoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
 
-	model.save('ls_cont_CM.h5')
-	model.save_weights('ls_cont_weights_CM.hdf5')
-	savePickle(history.losses,'ls_cont_CM_history.losses')
-	savePickle(history.acc,'ls_cont_CM_history.acc')
+	model.save('ls_cont1_CM.h5')
+	model.save_weights('ls_cont1_weights_CM.hdf5')
+	savePickle(history.losses,'ls_cont1_CM_history.losses')
+	savePickle(history.acc,'ls_cont1_CM_history.acc')
 
 	encoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_enc').output)
 	encoded_subj = encoderSubj.predict(X)
-	savePickle(encoded_subj,'ls_subj_encoded_CM')
+	savePickle(encoded_subj,'ls_cont1_encoded_CM')
 
 
 
