@@ -1,4 +1,4 @@
-# Cross-Language Embeddings for Document Classification
+# Neural Embeddings for Text Representation Learning
 
 The series of experiments focus on classifying mail data sets using Mono-Language and Cross-Language Embeddings. The main purpose for this cross-language experiment is to transfer the learning from resource rich language (labelled English mail data sets) to resource-poor language (unlabelled Dutch mail data sets - suspected as phising mails), as such it can distinguish legitimate vs. non-legitimate mails across languages.
 
