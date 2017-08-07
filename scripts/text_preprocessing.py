@@ -11,8 +11,8 @@ from __future__ import print_function
 
 import os
 import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 import tarfile
 import zipfile
 import pandas as pd
@@ -862,8 +862,7 @@ def sequenceToStr(wordSentences):
 # for tokenized string text
 def printDoc(sentences):
 
-	joinedStr = ' '.join(str(e) for e in sentences)
-	print(joinedStr)
+	print("%.2f")
 
 	return joinedStr
 
@@ -884,65 +883,35 @@ def printSentencesClass(classid, docid, sentid, sentences):
 
 
 
-# get statistics (number of sentences per document, number of words per sentence) for each class 
-def getStatClass(sentences):
-	nSentences = dict()
-	nWords = dict()
-	# class -nth
-	for i in range(len(sentences)):
-		n1 = []
-		n2 = [] 
-		# document -nth
-		for j in range(len(sentences[i])):
-			n3 = []
-			n1.append(len(sentences[i][j]))
-			for k in range(len(sentences[i][j])):
-				n3.append(len(sentences[i][j][k]))
-			n2.append(n3)
-		nSentences[i] = n1
-		nWords[i] = n2 
+# get number of words per document
+# for data training without splitting into sentences 
+# to provide time steps parameter for RNN
+# e.g. wordStats['nWords'] = 173
+def getWordStats(arraySentences):
 
-	minSent = []
-	maxSent = []
-	sumSent = []
-	avgSent = []
+	wordStats = []
+	# ignore null content mail
+	wordStats=[len(sent) for sent in arraySentences if len(sent) != 0]
 
-	minWords = []
-	maxWords = []
-	sumWords = []
-	avgWords = []
+	
 
-	for n in range(len(nSentences)):
-		minSent.append(min(nSentences[n]))
-		maxSent.append(max(nSentences[n]))
-		sumSent.append(sum(nSentences[n]))
-		tmp = sum(nSentences[n]) / len(nSentences[n])
-		avgSent.append(tmp)
-
-	for m in range(len(nWords)):
-		arr1 = []
-		arr2 = []
-		arr3 = []
-		arr4 = []
-		for n in range(len(nWords[m])):
-			arr1.append(min(nWords[m][n]))
-			arr2.append(max(nWords[m][n]))
-			tmp = sum(nWords[m][n])
-			arr3.append(tmp)
-			arr4.append(tmp/len(nWords[m][n]))
-		minWords.append(arr1)
-		maxWords.append(arr2)
-		sumWords.append(arr3)
-		avgWords.append(arr4)
+	return wordStats
 
 
-	return nSentences, nWords, minSent, maxSent, sumSent, avgSent, minWords, maxWords, sumWords, avgWords
+# get statistics (number of sentences per document, number of words per sentence) 
+def getDocStats(arraySentences):
 
+	docStats = {}
+	#docStats['nSentences']=[len(sent) for sent in numSentences]
+
+
+	return docStats
 
 # Shuffling sentences ( in every epoch to avoid local minima )
 def shuffleSentences(numericSentences):
 	sentences = np.array(numericSentences)
 	indices = np.arange(len(sentences))
+	np.random.shuffle(indices)
 	sentences = sentences[indices]
 
 	return sentences

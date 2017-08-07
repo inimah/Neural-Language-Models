@@ -263,15 +263,15 @@ def languageModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_we
 
 	# Creating encoder network
 	# encoding text input (sequence of words) into sentence embedding
-	model.add(LSTM(hidden_size,name='lstm_enc_1'))
+	model.add(LSTM(hidden_size,name='lstm_enc'))
 	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
 
 	# Creating decoder network
 	# objective function: predicting next words (language model)
 	for i in range(num_layers):
-		model.add(LSTM(hidden_size, name='lstm_%s'%(i+2), return_sequences=True))
-	model.add(TimeDistributed(Dense(VOCAB_LENGTH,name='dense_output')))
-	model.add(Activation('softmax'))
+		model.add(LSTM(hidden_size, name='lstm_dec%s'%(i+1), return_sequences=True))
+	model.add(TimeDistributed(Dense(VOCAB_LENGTH), name='td_output'))
+	model.add(Activation('softmax', name='last_output'))
 	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
 
@@ -291,26 +291,37 @@ def classificationModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedd
 	hidden_size = 200
 
 	model = Sequential()
-
 	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
 	model.add(Dropout(0.25))
-
 	model.add(LSTM(hidden_size, name='lstm_enc'))
 	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
-	#model.add(LSTM(hidden_size, name='lstm_dec',return_sequences=True))
-
 	model.add(LSTM(hidden_size, name='lstm_dec'))
-	model.add(Dense(1))
-
-	#model.add(TimeDistributed(Dense(1)))
-	model.add(Activation('sigmoid'))
-
+	model.add(Dense(1, name='dense_output'))
+	model.add(Activation('sigmoid', name='last_output'))
 	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
 	print(model.summary())
 
 	return model
 
+
+def classificationModel2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 200
+
+	model = Sequential()
+	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
+	model.add(Dropout(0.25))
+	model.add(LSTM(hidden_size, name='lstm_enc'))
+	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
+	model.add(LSTM(hidden_size, name='lstm_dec', return_sequences=True))
+	model.add(TimeDistributed(Dense(1), name='td_output'))
+	model.add(Activation('sigmoid', name='last_output'))
+	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+	print(model.summary())
+
+	return model
 
 ################################################
 # Neural Translation Model 
