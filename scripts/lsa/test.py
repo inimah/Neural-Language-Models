@@ -19,8 +19,11 @@ if __name__ == '__main__':
 	#examples_1 = ["The cat in the hat disabled", "A cat is a fine pet ponies.", "Dogs and cats make good pets.","I haven't got a hat."]
 	#tokenized_docs, vocab = generateSentVocab(examples_1)
 
-	examples_2 = ["Machine learning is super fun", "Python is super, super cool", "Statistics is cool, too", "Data science is fun", "Python is great for machine learning", "I like football", "Football is great to watch"]
-	tokenized_docs, vocab = generateSentVocab(examples_2)
+	#examples_2 = ["Machine learning is super fun", "Python is super, super cool", "Statistics is cool, too", "Data science is fun", "Python is great for machine learning", "I like football", "Football is great to watch"]
+	#tokenized_docs, vocab = generateSentVocab(examples_2)
+
+	examples_3 = ["Dogs eat the same things that cats eat", "No dog is a mouse", "Mice eat little things", "Cats often play with rats and mice", "Cats often play, but not with other cats"]
+	tokenized_docs, vocab = generateSentVocab(examples_3)
 
 	# save data
 	savePickle(tokenized_docs,'tokenized_docs')
