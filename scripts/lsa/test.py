@@ -19,11 +19,11 @@ if __name__ == '__main__':
 	#examples_1 = ["The cat in the hat disabled", "A cat is a fine pet ponies.", "Dogs and cats make good pets.","I haven't got a hat."]
 	#tokenized_docs, vocab = generateSentVocab(examples_1)
 
-	#examples_2 = ["Machine learning is super fun", "Python is super, super cool", "Statistics is cool, too", "Data science is fun", "Python is great for machine learning", "I like football", "Football is great to watch"]
-	#tokenized_docs, vocab = generateSentVocab(examples_2)
+	examples_2 = ["Machine learning is super fun", "Python is super, super cool", "Statistics is cool, too", "Data science is fun", "Python is great for machine learning", "I like football", "Football is great to watch"]
+	tokenized_docs, vocab = generateSentVocab(examples_2)
 
-	examples_3 = ["Dogs eat the same things that cats eat", "No dog is a mouse", "Mice eat little things", "Cats often play with rats and mice", "Cats often play, but not with other cats"]
-	tokenized_docs, vocab = generateSentVocab(examples_3)
+	#examples_3 = ["Dogs eat the same things that cats eat", "No dog is a mouse", "Mice eat little things", "Cats often play with rats and mice", "Cats often play, but not with other cats"]
+	#tokenized_docs, vocab = generateSentVocab(examples_3)
 
 	# save data
 	savePickle(tokenized_docs,'tokenized_docs')
@@ -46,8 +46,16 @@ if __name__ == '__main__':
 
 	# transpose input matrix (originally doc x term dimension -> to term x doc dimension)
 	bow_t = np.transpose(vs.td_bow)
+	# eliminate non-occur words in document corpus 
+	bow_null_ind = np.where(~bow_t.any(axis=1))[0]
+	savePickle(bow_null_ind,'bow_null_ind')
+	td_bow_t = []
+	for i in range(len(bow_t)):
+		if i not in bow_null_ind:
+			td_bow_t.append(bow_t[i])
+
 	# matrix decomposition of BOW
-	lsa_bow = LSA(bow_t)
+	lsa_bow = LSA(td_bow_t)
 	lsa_bow.transform()
 	# save matrices and objects
 	savePickle(lsa_bow.u,'lsa_bow_u')
@@ -58,8 +66,16 @@ if __name__ == '__main__':
 
 	# matrix decomposition of BOW-sublinear
 	bow_sublin_t = np.transpose(vs.td_bow_sublin)
+	# eliminate non-occur words in document corpus 
+	bow_sublin_null_ind = np.where(~bow_sublin_t.any(axis=1))[0]
+	savePickle(bow_sublin_null_ind,'bow_sublin_null_ind')
+	td_bow_sublin_t = []
+	for i in range(len(bow_sublin_t)):
+		if i not in bow_sublin_null_ind:
+			td_bow_sublin_t.append(bow_sublin_t[i])
+
 	# matrix decomposition of BOW
-	lsa_bow_sublin = LSA(bow_sublin_t)
+	lsa_bow_sublin = LSA(td_bow_sublin_t)
 	lsa_bow_sublin.transform()
 	# save matrices and objects
 	savePickle(lsa_bow_sublin.u,'lsa_bow_sublin_u')
@@ -69,7 +85,15 @@ if __name__ == '__main__':
 	savePickle(lsa_bow_sublin.transformed_matrix,'svd_bow_sublin')
 	
 	# matrix decomposition of TF-IDF
-	td_tfidf_t = np.transpose(td_tfidf)
+	tfidf_t = np.transpose(td_tfidf)
+	# eliminate non-occur words in document corpus 
+	tfidf_null_ind = np.where(~tfidf_t.any(axis=1))[0]
+	savePickle(tfidf_null_ind,'tfidf_null_ind')
+	td_tfidf_t = []
+	for i in range(len(tfidf_t)):
+		if i not in tfidf_null_ind:
+			td_tfidf_t.append(tfidf_t[i])
+
 	lsa_tfidf = LSA(td_tfidf_t)
 	lsa_tfidf.transform()
 	# save matrices and objects
