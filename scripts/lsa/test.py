@@ -9,9 +9,10 @@ from __future__ import print_function
 import sys
 import numpy as np
 from text_preprocessing import *
-from lsa.vector_space import VectorSpace
-from lsa.tfidf import TFIDF
-from lsa.lsa import LSA
+from vector_space import VectorSpace
+from tfidf import TFIDF
+from lsa import LSA
+from tokenizer import Tokenizer
 
 
 if __name__ == '__main__':
@@ -19,11 +20,19 @@ if __name__ == '__main__':
 	#examples_1 = ["The cat in the hat disabled", "A cat is a fine pet ponies.", "Dogs and cats make good pets.","I haven't got a hat."]
 	#tokenized_docs, vocab = generateSentVocab(examples_1)
 
-	examples_2 = ["Machine learning is super fun", "Python is super, super cool", "Statistics is cool, too", "Data science is fun", "Python is great for machine learning", "I like football", "Football is great to watch"]
-	tokenized_docs, vocab = generateSentVocab(examples_2)
+	#examples_2 = ["Machine learning is super fun", "Python is super, super cool", "Statistics is cool, too", "Data science is fun", "Python is great for machine learning", "I like football", "Football is great to watch"]
 
-	#examples_3 = ["Dogs eat the same things that cats eat", "No dog is a mouse", "Mice eat little things", "Cats often play with rats and mice", "Cats often play, but not with other cats"]
+	# preserves stopwords & without stemming
+	# tokenized_docs, vocab = generateSentVocab(examples_2)
+	## tokenizer with eliminating stopwords and stemming
+	
+
+
+	examples_3 = ["Dogs eat the same things that cats eat", "No dog is a mouse", "Mice eat little things", "Cats often play with rats and mice", "Cats often play, but not with other cats"]
 	#tokenized_docs, vocab = generateSentVocab(examples_3)
+
+	tokenizer = Tokenizer()
+	tokenized_docs, vocab = tokenizer.tokenise_and_remove_stop_words(examples_3)
 
 	# save data
 	savePickle(tokenized_docs,'tokenized_docs')
