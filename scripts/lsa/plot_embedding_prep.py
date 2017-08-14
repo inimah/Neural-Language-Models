@@ -41,36 +41,39 @@ if __name__ == '__main__':
 	"Football is great to watch"]
 	'''
 
-	tokenized_docs = readPickle('../../embeddings/examples_2/lsa/nonprep/tokenized_docs')
-	vocab = readPickle('../../embeddings/examples_2/lsa/nonprep/vocab')
-	td_bow = readPickle('../../embeddings/examples_2/lsa/nonprep/td_bow')
-	td_bow_sublin = readPickle('../../embeddings/examples_2/lsa/nonprep/td_bow_sublin')
-	td_tfidf = readPickle('../../embeddings/examples_2/lsa/nonprep/td_tfidf')
-	bow_null_ind = readPickle('../../embeddings/examples_2/lsa/nonprep/bow_null_ind')
-	bow_sublin_null_ind = readPickle('../../embeddings/examples_2/lsa/nonprep/bow_sublin_null_ind')
-	tfidf_null_ind = readPickle('../../embeddings/examples_2/lsa/nonprep/tfidf_null_ind')
+	tokenized_docs = readPickle('../../embeddings/examples_2/lsa/prep/tokenized_docs')
+	vocab = readPickle('../../embeddings/examples_2/lsa/prep/vocab')
+	td_bow = readPickle('../../embeddings/examples_2/lsa/prep/td_bow')
+	td_bow_sublin = readPickle('../../embeddings/examples_2/lsa/prep/td_bow_sublin')
+	td_tfidf = readPickle('../../embeddings/examples_2/lsa/prep/td_tfidf')
+	bow_null_ind = readPickle('../../embeddings/examples_2/lsa/prep/bow_null_ind')
+	bow_sublin_null_ind = readPickle('../../embeddings/examples_2/lsa/prep/bow_sublin_null_ind')
+	tfidf_null_ind = readPickle('../../embeddings/examples_2/lsa/prep/tfidf_null_ind')
 
-	text_w = ['statistics', 'python', 'data', 'football', 'watch', 'machine', 'learning', 'science', 'fun', 'cool']
+
+
+	#text_w = ['statistics', 'python', 'data', 'football', 'watch', 'machine', 'learning', 'science', 'fun', 'cool']
+	text_w = vocab.values()
 
 	## Word vectors from LSA-BOW approach 
 	######################################
 
-	lsa_bow_u= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_bow_u')
+	lsa_bow_u= readPickle('../../embeddings/examples_2/lsa/prep/lsa_bow_u')
 	#print("lsa_bow_u.shape: %s \n" %str(lsa_bow_u.shape))
 	#print(lsa_bow_u)
 
-	lsa_bow_sigma= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_bow_sigma')
+	lsa_bow_sigma= readPickle('../../embeddings/examples_2/lsa/prep/lsa_bow_sigma')
 	#print("lsa_bow_sigma.shape: %s \n" %str(lsa_bow_sigma.shape))
 	#print(lsa_bow_sigma)
 
-	lsa_bow_vt= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_bow_vt')
+	lsa_bow_vt= readPickle('../../embeddings/examples_2/lsa/prep/lsa_bow_vt')
 	lsa_bow_v = np.transpose(lsa_bow_vt)
 	#print("bow_v.shape: %s \n" %str(bow_v.shape))
 	#print(bow_v)
 
 	# words similarity w.r.t document context
 	# column is principal component or dimension (context) in which we can measure similarity of words in context (rows of matrix)
-	lsa_bow_diag_sigma = readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_bow_diag_sigma')
+	lsa_bow_diag_sigma = readPickle('../../embeddings/examples_2/lsa/prep/lsa_bow_diag_sigma')
 	wv_bow = dot(lsa_bow_u, lsa_bow_diag_sigma)
 	#print("wv_bow.shape: %s \n" %str(wv_bow.shape))
 	#print(wv_bow)
@@ -147,7 +150,7 @@ if __name__ == '__main__':
 
 	
 	fig = go.Figure(data=data_wv_bow_pca2, layout=layout)
-	py.iplot(fig, filename='wv_bow_pca2')
+	py.iplot(fig, filename='wv_bow_pca2_prep')
 
 	trace_wv_bow_tsne2 = go.Scatter(
 	x = wv_bow_tsne2[:, 0],
@@ -160,7 +163,7 @@ if __name__ == '__main__':
 	
 	
 	fig = go.Figure(data=data_wv_bow_tsne2, layout=layout)
-	py.iplot(fig, filename='wv_bow_tsne2')
+	py.iplot(fig, filename='wv_bow_tsne2_prep')
 	
 
 
@@ -168,15 +171,15 @@ if __name__ == '__main__':
 	## Word vectors from LSA-Sublinear BOW approach  
 	######################################
 
-	lsa_bow_sublin_u= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_bow_sublin_u')
+	lsa_bow_sublin_u= readPickle('../../embeddings/examples_2/lsa/prep/lsa_bow_sublin_u')
 	#print("lsa_bow_sublin_u.shape: %s \n" %str(lsa_bow_sublin_u.shape))
 	#print(lsa_bow_sublin_u)
 
-	lsa_bow_sublin_sigma= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_bow_sublin_sigma')
+	lsa_bow_sublin_sigma= readPickle('../../embeddings/examples_2/lsa/prep/lsa_bow_sublin_sigma')
 	#print("lsa_bow_sublin_sigma.shape: %s \n" %str(lsa_bow_sublin_sigma.shape))
 	#print(lsa_bow_sublin_sigma)
 
-	lsa_bow_sublin_vt= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_bow_sublin_vt')
+	lsa_bow_sublin_vt= readPickle('../../embeddings/examples_2/lsa/prep/lsa_bow_sublin_vt')
 	#print("lsa_bow_sublin_vt.shape: %s \n" %str(lsa_bow_sublin_vt.shape))
 	#print(lsa_bow_sublin_vt)
 	lsa_bow_sublin_v = np.transpose(lsa_bow_sublin_vt)
@@ -185,7 +188,7 @@ if __name__ == '__main__':
 
 	# words similarity w.r.t document context
 	# column is principal component or dimension (context) in which we can measure similarity of words in context (rows of matrix)
-	lsa_bow_sublin_diag_sigma = readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_bow_sublin_diag_sigma')
+	lsa_bow_sublin_diag_sigma = readPickle('../../embeddings/examples_2/lsa/prep/lsa_bow_sublin_diag_sigma')
 	wv_bow_sublin = dot(lsa_bow_sublin_u, lsa_bow_sublin_diag_sigma)
 	#print("wv_bow_sublin.shape: %s \n" %str(wv_bow_sublin.shape))
 	#print(wv_bow_sublin)
@@ -233,7 +236,7 @@ if __name__ == '__main__':
 	
 	
 	fig = go.Figure(data=data_wv_bow_sublin_pca2, layout=layout)
-	py.iplot(fig, filename='wv_bow_sublin_pca2')
+	py.iplot(fig, filename='wv_bow_sublin_pca2_prep')
 
 	trace_wv_bow_sublin_tsne2 = go.Scatter(
 	x = wv_bow_sublin_tsne2[:, 0],
@@ -246,7 +249,7 @@ if __name__ == '__main__':
 	
 	
 	fig = go.Figure(data=data_wv_bow_sublin_tsne2, layout=layout)
-	py.iplot(fig, filename='wv_bow_sublin_tsne2')
+	py.iplot(fig, filename='wv_bow_sublin_tsne2_prep')
 	
 
 	
@@ -254,15 +257,15 @@ if __name__ == '__main__':
 	## Word vectors from LSA-TF IDF approach  
 	######################################
 
-	lsa_tfidf_u= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_tfidf_u')
+	lsa_tfidf_u= readPickle('../../embeddings/examples_2/lsa/prep/lsa_tfidf_u')
 	#print("lsa_tfidf_u.shape: %s \n" %str(lsa_tfidf_u.shape))
 	#print(lsa_tfidf_u)
 
-	lsa_tfidf_sigma= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_tfidf_sigma')
+	lsa_tfidf_sigma= readPickle('../../embeddings/examples_2/lsa/prep/lsa_tfidf_sigma')
 	#print("lsa_tfidf_sigma.shape: %s \n" %str(lsa_tfidf_sigma.shape))
 	#print(lsa_tfidf_sigma)
 
-	lsa_tfidf_vt= readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_tfidf_vt')
+	lsa_tfidf_vt= readPickle('../../embeddings/examples_2/lsa/prep/lsa_tfidf_vt')
 	#print("lsa_tfidf_vt.shape: %s \n" %str(lsa_tfidf_vt.shape))
 	#print(lsa_tfidf_vt)
 	lsa_tfidf_v = np.transpose(lsa_tfidf_vt)																																																																																																																																	
@@ -271,7 +274,7 @@ if __name__ == '__main__':
 
 	# words similarity w.r.t document context
 	# column is principal component or dimension (context) in which we can measure similarity of words in context (rows of matrix)
-	lsa_tfidf_diag_sigma = readPickle('../../embeddings/examples_2/lsa/nonprep/lsa_tfidf_diag_sigma')
+	lsa_tfidf_diag_sigma = readPickle('../../embeddings/examples_2/lsa/prep/lsa_tfidf_diag_sigma')
 	wv_tfidf = dot(lsa_tfidf_u, lsa_tfidf_diag_sigma)
 	#print("wv_tfidf.shape: %s \n" %str(wv_tfidf.shape))
 	#print(wv_tfidf)
@@ -322,7 +325,7 @@ if __name__ == '__main__':
 
 	
 	fig = go.Figure(data=data_wv_tfidf_pca2, layout=layout)
-	py.iplot(fig, filename='wv_tfidf_pca2')
+	py.iplot(fig, filename='wv_tfidf_pca2_prep')
 
 	trace_wv_tfidf_tsne2 = go.Scatter(
 	x = wv_tfidf_tsne2[:, 0],
@@ -335,9 +338,9 @@ if __name__ == '__main__':
 	
 	
 	fig = go.Figure(data=data_wv_tfidf_tsne2, layout=layout)
-	py.iplot(fig, filename='wv_tfidf_tsne2')
+	py.iplot(fig, filename='wv_tfidf_tsne2_prep')
 	
-
+	'''
 	## Word vectors from Word2Vec  
 	######################################
 
@@ -571,6 +574,9 @@ if __name__ == '__main__':
 
 	fig = go.Figure(data=data_dv2_idf_tsne2, layout=layout)
 	py.iplot(fig, filename='dv2_idf_tsne2')
+
+
+	'''
 
 
 

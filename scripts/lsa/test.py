@@ -20,7 +20,7 @@ if __name__ == '__main__':
 	#examples_1 = ["The cat in the hat disabled", "A cat is a fine pet ponies.", "Dogs and cats make good pets.","I haven't got a hat."]
 	#tokenized_docs, vocab = generateSentVocab(examples_1)
 
-	#examples_2 = ["Machine learning is super fun", "Python is super, super cool", "Statistics is cool, too", "Data science is fun", "Python is great for machine learning", "I like football", "Football is great to watch"]
+	examples_2 = ["Machine learning is super fun", "Python is super, super cool", "Statistics is cool, too", "Data science is fun", "Python is great for machine learning", "I like football", "Football is great to watch"]
 
 	# preserves stopwords & without stemming
 	# tokenized_docs, vocab = generateSentVocab(examples_2)
@@ -28,11 +28,26 @@ if __name__ == '__main__':
 	
 
 
-	examples_3 = ["Dogs eat the same things that cats eat", "No dog is a mouse", "Mice eat little things", "Cats often play with rats and mice", "Cats often play, but not with other cats"]
+	#examples_3 = ["Dogs eat the same things that cats eat", "No dog is a mouse", "Mice eat little things", "Cats often play with rats and mice", "Cats often play, but not with other cats"]
 	#tokenized_docs, vocab = generateSentVocab(examples_3)
 
+	tokenized_docs = []
+	docwords = []
+
 	tokenizer = Tokenizer()
-	tokenized_docs, vocab = tokenizer.tokenise_and_remove_stop_words(examples_3)
+
+
+	for text in examples_2:
+		
+		tmp = tokenizer.tokenise_and_remove_stop_words(text)
+		tokenized_docs.append(tmp)
+
+	docwords = sum(tokenized_docs,[])
+
+	vocab = tokenizer._vocab(docwords)
+
+	
+	
 
 	# save data
 	savePickle(tokenized_docs,'tokenized_docs')
@@ -113,4 +128,4 @@ if __name__ == '__main__':
 	savePickle(lsa_tfidf.transformed_matrix,'svd_tfidf')
 
 
-	
+
