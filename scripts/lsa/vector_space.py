@@ -46,9 +46,9 @@ class VectorSpace:
 	# document similarity
 	def cosineSimilarity(self, document_id, matrix):
 		""" find documents that are related to the document indexed by passed Id within the document Vectors"""
-		doc_rank = [self._cosine(matrix[document_id], document_vector) for document_vector in matrix]
-		doc_rank.sort(reverse = True)
-		return doc_rank
+		doc_sim = [self._cosine(matrix[document_id], document_vector) for document_vector in matrix]
+		#doc_rank.sort(reverse = True)
+		return doc_sim
 
 
 	# term frequency
