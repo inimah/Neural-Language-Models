@@ -155,10 +155,11 @@ def docEmbedding(documents, vocab, argsize, argiter):
 # generating sentence-level / document embedding by averaging word2vec
 # document here is sentence - or sequence of words
 ################################################
-def averageWE(word2vec_model, documents):
+def averageWE(w2v_weights, vocab, documents):
 
-	w2v_vocab = word2vec_model.wv.index2word
-	w2v_weights = word2vec_model.wv.syn0
+	#w2v_vocab = word2vec_model.wv.index2word
+	#w2v_weights = word2vec_model.wv.syn0
+	w2v_vocab = vocab.values()
 	w2v = dict(zip(w2v_vocab, w2v_weights))
 	dim = len(w2v.itervalues().next())
 
@@ -197,35 +198,23 @@ def computeIDF(word, list_of_docs):
 
 	return idf
 
-def averageIdfWE(word2vec_model, vocab, documents):
+def averageIdfWE(w2v_weights, vocab, documents):
 
-	w2v_vocab = word2vec_model.wv.index2word
-	w2v_weights = word2vec_model.wv.syn0
-	w2v = dict(zip(w2v_vocab, w2v_weights))
-	dim = len(w2v.itervalues().next())
+	#w2v_vocab = word2vec_model.wv.index2word
+	#w2v_weights = word2vec_model.wv.syn0
+
 
 	
 	print('calculating Tf-Idf weights...')
-	'''
-	# transforming tokenized documents into string format - following the input format of TfidfVectorizer
-	#strSentences = sequenceToStr(documents)
 
-	#tfidf = TfidfVectorizer(analyzer=partial(nltk.regexp_tokenize, pattern=pattern), use_idf=True, smooth_idf= True, norm=None, stop_words=None)
-	#tfidf_matrix = tfidf.fit_transform(strSentences)
-	# the resulting document term matrix (tf-idf doc-term matrix)
-	#arrTfIdf = tfidf_matrix.todense()
-
-	# sklearn library use the following formula of idf
-	
-
-	# use idf weights as the weight of word vectors
-	#idf = tfidf.idf_ 
-	#wordIdf = dict(zip(tfidf.get_feature_names(), idf))
-	'''
 
 	words = []
 	for k,v in vocab.iteritems():
 		words.append(v)
+
+	w2v_vocab = words
+	w2v = dict(zip(w2v_vocab, w2v_weights))
+	dim = len(w2v.itervalues().next())
 
 	wordIdf = {}
 
@@ -251,10 +240,11 @@ def averageIdfWE(word2vec_model, vocab, documents):
 
 ################################################
 
+# with keras sequential model
+# full encoder - decoder model 
+def languageModel1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
-def languageModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
-
-	hidden_size = 200
+	hidden_size = 50
 	num_layers = 3
 
 	model = Sequential()
@@ -277,6 +267,177 @@ def languageModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_we
 
 	return model
 
+# with keras functional API
+# full encoder - decoder model 
+# apply for TimeDistributed layer
+
+def languageModel2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 50
+	num_layers = 3
+
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	lstm_layer = LSTM(hidden_size, name='lstm_enc')(embedded_layer)
+	encoder_output = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(lstm_layer)
+
+	# Creating decoder network
+	# objective function: predicting next words (language model)
+	for i in range(num_layers):
+		decoder_layer = LSTM(hidden_size, return_sequences=True,name='lstm_dec_%s'%(i))(encoder_output)
+	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax', name='dense_output'))(decoder_layer)
+	model = Model(sequence_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	'''
+	_________________________________________________________________
+	Layer (type)                 Output Shape              Param #   
+	=================================================================
+	input_1 (InputLayer)         (None, 1000)              0         
+	_________________________________________________________________
+	embedding_1 (Embedding)      (None, 1000, 100)         8056300    -
+	_________________________________________________________________
+	lstm_1 (LSTM)                (None, 100)               80400      -> doc vector
+	_________________________________________________________________
+	encoder_repeat (RepeatVector (None, 1000, 100)         0         
+	_________________________________________________________________
+	lstm_dec_3 (LSTM)            (None, 1000, 100)         80400     
+	_________________________________________________________________
+	time_distributed_1 (TimeDist (None, 1000, 2)           202       
+	=================================================================
+	Total params: 8,217,302
+	Trainable params: 8,217,302
+	Non-trainable params: 0
+	_________________________________________________________________
+
+	'''
+
+	return model
+
+# with Bidirectional LSTM
+def languageModel3(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 25
+	num_layers = 3
+
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	lstm_layer = Bidirectional(LSTM(hidden_size, name='lstm_enc_1'))(embedded_layer)
+	encoder_output = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(lstm_layer)
+
+	# Creating decoder network
+	# objective function: predicting next words (language model)
+	for i in range(num_layers):
+		decoder_layer = Bidirectional(LSTM(hidden_size, return_sequences=True,name='lstm_dec_%s'%(i+2)))(encoder_output)
+	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax', name='dense_output'))(decoder_layer)
+	model = Model(sequence_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	'''
+	_________________________________________________________________
+	Layer (type)                 Output Shape              Param #   
+	=================================================================
+	input_1 (InputLayer)         (None, 1000)              0         
+	_________________________________________________________________
+	embedding_1 (Embedding)      (None, 1000, 100)         8056300    -
+	_________________________________________________________________
+	lstm_1 (LSTM)                (None, 100)               80400      -> doc vector
+	_________________________________________________________________
+	encoder_repeat (RepeatVector (None, 1000, 100)         0         
+	_________________________________________________________________
+	lstm_dec_3 (LSTM)            (None, 1000, 100)         80400     
+	_________________________________________________________________
+	time_distributed_1 (TimeDist (None, 1000, 2)           202       
+	=================================================================
+	Total params: 8,217,302
+	Trainable params: 8,217,302
+	Non-trainable params: 0
+	_________________________________________________________________
+
+	'''
+
+	return model
+
+# with keras functional API
+# only encoder
+# apply for Dense layer
+
+def languageModel4(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 50
+	num_layers = 3
+
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	lstm_layer = LSTM(hidden_size, name='lstm_enc')(embedded_layer)
+
+	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(lstm_layer)
+	model = Model(sequence_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	'''
+	________________________________________________________________
+	Layer (type)                 Output Shape              Param #   
+	=================================================================
+	input_1 (InputLayer)         (None, 1000)              0         
+	_________________________________________________________________
+	embedding_1 (Embedding)      (None, 1000, 100)         8056300   
+	_________________________________________________________________
+	lstm_1 (LSTM)                (None, 100)               80400     
+	_________________________________________________________________
+	dense_output (Dense)         (None, 2)                 202       
+	=================================================================
+	Total params: 8,136,902
+	Trainable params: 8,136,902
+	Non-trainable params: 0
+
+	'''
+
+	return model
+
+# with bidirectional LSTM
+def languageModel5(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 25
+	num_layers = 3
+
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	lstm_layer = Bidirectional(LSTM(hidden_size, name='lstm_enc'))(embedded_layer)
+
+	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(decoder_layer)
+	model = Model(sequence_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	'''
+	________________________________________________________________
+	Layer (type)                 Output Shape              Param #   
+	=================================================================
+	input_1 (InputLayer)         (None, 1000)              0         
+	_________________________________________________________________
+	embedding_1 (Embedding)      (None, 1000, 100)         8056300   
+	_________________________________________________________________
+	lstm_1 (LSTM)                (None, 100)               80400     
+	_________________________________________________________________
+	dense_output (Dense)         (None, 2)                 202       
+	=================================================================
+	Total params: 8,136,902
+	Trainable params: 8,136,902
+	Non-trainable params: 0
+
+	'''
+
+	return model
+
+# with keras functional API
 
 ################################################
 # Neural Classification Model 
@@ -356,6 +517,7 @@ def translationModel(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_D
 
 ################################################
 # Hierarchical Neural Language Model 
+# with encoder - decoder type architecture
 #
 # input array for this model is in 4D shape
 # ( rows,       cols,     time_steps,    n_dim     )
@@ -363,19 +525,25 @@ def translationModel(X_vocab_len, X_max_len, y_vocab_len, y_max_len, EMBEDDING_D
 # ( n_docs, n_sentences,   n_words    dim_embedding)
 ################################################
 
-def hierarchyLanguage(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+# full encoder - decoder
+def hierarchyLanguage1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
-	row_hidden_size = 200
-	col_hidden_size = 200
+	row_hidden_size = 100
+	col_hidden_size = 100
 	num_layers = 3
 
 
-	x = Input(shape=(MAX_SEQUENCE_LENGTH, ), dtype='int64')
+	sentences_input = Input(shape=(MAX_SEQUENCE_LENGTH, ), dtype='int64')
 	# embedding layer
-	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(x)
+	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sentences_input)
 	# Encoder model
 	# Encodes sentences
-	encoded_sentences = TimeDistributed(LSTM(row_hidden_size, name='lstm_enc_1', return_sequences=True))(embedded_sentences)
+	sent_lstm = LSTM(row_hidden_size, name='lstm_enc_1')(embedded_sentences)
+	sent_model = Model(sentences_input, sent_lstm)
+
+	doc_input = Input(shape=(MAX_SENTS,MAX_SEQUENCE_LENGTH), dtype='int64')
+
+	encoded_sentences = TimeDistributed(sent_model)(doc_input)
 	
 	# Encodes documents
 	encoded_docs = LSTM(col_hidden_size, name='lstm_enc_2')(encoded_sentences)
@@ -390,10 +558,91 @@ def hierarchyLanguage(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embeddin
 
 	decoder = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax', name='dense_output'))(decoder_layer)
 
-	model = Model(x, decoder)
+	model = Model(doc_input, decoder)
 
 	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
+
+	'''
+_________________________________________________________________
+	Layer (type)                 Output Shape              Param #
+	=================================================================
+	input_2 (InputLayer)         (None, 15, 100)           0
+	_________________________________________________________________
+	time_distributed_1 (TimeDist (None, 15, 100)           8136700
+	_________________________________________________________________
+	lstm_enc_2 (LSTM)            (None, 100)               80400
+	_________________________________________________________________
+	encoder_repeat (RepeatVector (None, 100, 100)          0
+	_________________________________________________________________
+	lstm_dec_3 (LSTM)            (None, 100, 100)          80400
+	_________________________________________________________________
+	time_distributed_2 (TimeDist (None, 100, 80563)        8136863
+	=================================================================
+	Total params: 16,434,363
+	Trainable params: 16,434,363
+	Non-trainable params: 0
+	_________________________________________________________________
+	None
+
+
+	'''
+
+
+	return model
+
+
+# USE THIS
+# only encoder (no decoder layer)
+# and dense layer
+def hierarchyLanguage2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 100
+
+	# this will process sequence of words in a current sentence 
+	# LSTM layer for this input --> predicts word based on preceding words --> this will represent our sentence vector
+	# P(wt | w1...wt-1) or in another words P(sentence) = P(w1...wt-1)
+	sentences_input = Input(shape=(MAX_SEQUENCE_LENGTH, ), dtype='int64')
+	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sentences_input)
+	sent_lstm = LSTM(hidden_size, name='lstm_enc_1')(embedded_sentences)
+	sent_model = Model(sentences_input, sent_lstm)
+
+	# this will process sequence of sentences as part of a document
+	# representing document vector
+	# P(St | S1..St-1)
+	doc_input = Input(shape=(MAX_SENTS,MAX_SEQUENCE_LENGTH), dtype='int64')
+	# the following TimeDistributed layer will link LSTM learning of sentence model (as joint distribution of words in sentence) to document model (as joint distribution of sentences)
+	encoded_sentences = TimeDistributed(sent_model)(doc_input)
+	encoded_docs = LSTM(hidden_size, name='lstm_enc_2')(encoded_sentences)
+	
+	# the class label here is words in fixed vocabulary list
+	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(encoded_docs)
+	model = Model(doc_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	'''
+	_________________________________________________________________
+	Layer (type)                 Output Shape              Param #
+	=================================================================
+	input_2 (InputLayer)         (None, 15, 100)           0
+	_________________________________________________________________
+	time_distributed_1 (TimeDist (None, 15, 100)           8136700
+	_________________________________________________________________
+	lstm_enc_2 (LSTM)            (None, 100)               80400
+	_________________________________________________________________
+	dense_output (Dense)         (None, 80563)             8136863
+	=================================================================
+	Total params: 16,353,963
+	Trainable params: 16,353,963
+	Non-trainable params: 0
+	_________________________________________________________________
+	None
+
+
+	'''
+
 
 	return model
 
@@ -405,11 +654,16 @@ def hierarchyLanguage(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embeddin
 # ( _____   ___________   _________   ____________ )
 # ( n_docs, n_sentences,   n_words    dim_embedding)
 ################################################
+
+
+# !!!!NOT BEING USED!!!!
+# with time distributed layer to get the projection of vector on class labels 
+# include latent vector dimension in the last layer (, ndim, class size) instead of just (, class size)
 def hierarchyClassifier1(MAX_SENTENCES, MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
 
 	
-	row_hidden_size = 200
-	col_hidden_size = 200
+	row_hidden_size = 100
+	col_hidden_size = 100
 
 	if num_classes > 2:
 		loss_function = 'categorical_crossentropy'
@@ -420,22 +674,44 @@ def hierarchyClassifier1(MAX_SENTENCES, MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBED
 	embedded_sentences = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sentences_input)
 	lstm_sentence = TimeDistributed(LSTM(row_hidden_size,name='lstm_enc_1'))(embedded_sentences)
 	
-	docs_model = LSTM(col_hidden_size,name='lstm_enc_2')(lstm_sentence)
+	docs_model = LSTM(col_hidden_size,name='lstm_enc_2', return_sequences=True)(lstm_sentence)
 
 	# Prediction
-	prediction = Dense(num_classes, activation='softmax', name='dense_out')(docs_model)
+	prediction = TimeDistributed(Dense(num_classes, activation='softmax', name='dense_out'))(docs_model)
 	model = Model(sentences_input, prediction)
 	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
 
+	'''
+	Layer (type)                 Output Shape              Param #   
+	=================================================================
+	input_2 (InputLayer)         (None, 15, 100)           0         
+	_________________________________________________________________
+	time_distributed_1 (TimeDist (None, 15, 100)           8136700   
+	_________________________________________________________________
+	lstm_enc_2 (LSTM)            (None, 15, 100)           80400     
+	_________________________________________________________________
+	time_distributed_2 (TimeDist (None, 15, 80563)         8136863   
+	=================================================================
+	Total params: 16,353,963
+	Trainable params: 16,353,963
+	Non-trainable params: 0
+	_________________________________________________________________
+	None
+
+	'''
+
 
 	return model
 
-def hierarchyClassifier2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
 
-	n_docs = 1
-	row_hidden_size = 200
-	col_hidden_size = 200
+# USE THIS
+# with dense layer
+def hierarchyClassifier2(MAX_SENTENCES, MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights, num_classes):
+
+
+	row_hidden_size = 100
+	col_hidden_size = 100
 
 	if num_classes > 2:
 		loss_function = 'categorical_crossentropy'
@@ -447,7 +723,7 @@ def hierarchyClassifier2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embed
 	lstm_sentence = LSTM(row_hidden_size,name='lstm_enc_1')(embedded_sentence)
 	sentences_model = Model(sentences_input, lstm_sentence)
 
-	docs_input = Input(shape=(n_docs, MAX_SEQUENCE_LENGTH), dtype='int64')
+	docs_input = Input(shape=(MAX_SENTENCES, MAX_SEQUENCE_LENGTH), dtype='int64')
 	docs_encoded = TimeDistributed(sentences_model)(docs_input)
 	#dropout = Dropout(0.2)(docs_encoded)
 	docs_model = LSTM(col_hidden_size,name='lstm_enc_2')(docs_encoded)
@@ -457,6 +733,27 @@ def hierarchyClassifier2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embed
 	model = Model(docs_input, prediction)
 	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
+
+	'''
+	in this summary, number of classes = vocab size
+	_________________________________________________________________
+		Layer (type)                 Output Shape              Param #
+	=================================================================
+	input_2 (InputLayer)         (None, 15, 100)           0
+	_________________________________________________________________
+	time_distributed_1 (TimeDist (None, 15, 100)           8136700
+	_________________________________________________________________
+	lstm_enc_2 (LSTM)            (None, 100)               80400
+	_________________________________________________________________
+	dense_out (Dense)            (None, 80563)             8136863
+	=================================================================
+	Total params: 16,353,963
+	Trainable params: 16,353,963
+	Non-trainable params: 0
+	_________________________________________________________________
+	None
+
+	'''
 
 
 	return model
@@ -510,12 +807,14 @@ def seqTDClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_
 	# encoding rows (sentences)
 	model.add(TimeDistributed(LSTM(row_hidden_size,name='lstm_enc_1')))
 
-	# encoding cols (documents)
+	# encoding cols (documents)	model.add(TimeDistributed(LSTM(row_hidden_size,name='lstm_enc_1')))
+	
 	model.add(LSTM(col_hidden_size,name='lstm_enc_2'))
 	model.add(Dense(num_classes, activation='softmax', name='dense_out'))
 	model.compile(loss=loss_function, optimizer='rmsprop', metrics=['accuracy'])
 
 	print(model.summary())
+
 
 	return model
 
@@ -562,7 +861,7 @@ def seqClassifier(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_we
 
 	return model
 
-	# with time-distributed layer
+# with time-distributed layer
 # return all time steps in previous layer
 def simpleSeqClassifier2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 

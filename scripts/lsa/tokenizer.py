@@ -15,6 +15,7 @@ import string
 from porter_stemmer import PorterStemmer
 
 cwd = os.getcwd()
+#cwd = '/home/inimah/git/Neural-Language-Models/scripts'
 
 
 class Tokenizer:
@@ -60,13 +61,21 @@ class Tokenizer:
 		""" Remove common words which have no search value """
 		return [word for word in list if word not in self.stopwords ]
 
+	def _stemming(self, list):
+
+		return [self.stemmer.stem(word, 0, len(word)-1) for word in list]
+
+
 
 	def _tokenise(self, string):
 		""" break string up into tokens and stem words """
 		string = self._clean(string)
 		words = string.split(" ")
+		stemwords = self._stemming(words)
+
+		# [self.stemmer.stem(word, 0, len(word)-1) for word in words]
 		
-		return [self.stemmer.stem(word, 0, len(word)-1) for word in words]
+		return stemwords
 
 	def _clean(self, text):
 		""" remove any nasty grammar tokens from string """

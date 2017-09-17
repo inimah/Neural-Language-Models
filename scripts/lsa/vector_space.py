@@ -29,6 +29,10 @@ class VectorSpace:
 	td_bow = []
 	td_bow_sublin = []
 	td_tfidf = []
+
+	td_bow_info = []
+	td_bow_sublin_info = []
+	td_tfidf_info = []
 	# vocab (in dictionary format)
 	word_index = {}
 
@@ -37,10 +41,14 @@ class VectorSpace:
 		self.td_bow = []
 		self.td_bow_sublin = []
 		self.td_tfidf = []
+		self.td_bow_info = []
+		self.td_bow_sublin_info = []
+		self.td_tfidf_info = []
 		self.word_index = {}
+		
 		if len(documents) > 0:
 			self.word_index = vocab
-			self.td_bow, self.td_bow_sublin, self.td_tfidf = self.buildTermDocMatrix(documents, vocab, transforms)
+			self.td_bow, self.td_bow_info, self.td_bow_sublin, self.td_bow_sublin_info, self.td_tfidf, self.td_tfidf_info = self.buildTermDocMatrix(documents, vocab, transforms)
 			
 
 	# document similarity
@@ -67,19 +75,22 @@ class VectorSpace:
 		
 		
 
-		bow_matrix = self.createBOW(tokenized_documents) 
+		bow_matrix, bow_td_matrix = self.createBOW(tokenized_documents) 
 		#bow_matrix = reduce(lambda matrix,transform: transform(bow_matrix).transform(), transforms, bow_matrix)
 		self.td_bow = bow_matrix
+		self.td_bow_info = bow_td_matrix
 
-		sublin_bow_matrix = self.createSublinearBOW(tokenized_documents) 
+		sublin_bow_matrix, sublin_bow_td_matrix = self.createSublinearBOW(tokenized_documents) 
 		#sublin_bow_matrix = reduce(lambda matrix,transform: transform(sublin_bow_matrix).transform(), transforms, sublin_bow_matrix)
 		self.td_bow_sublin = sublin_bow_matrix
+		self.td_bow_sublin_info = sublin_bow_td_matrix
 
-		tfidf_doc = self.createTfIdf(tokenized_documents)
+		tfidf_doc, tfidfDoc_info = self.createTfIdf(tokenized_documents)
 		#tfidf_doc = reduce(lambda matrix,transform: transform(tfidf_doc).transform(), transforms, tfidf_doc)
 		self.td_tfidf = tfidf_doc
+		self.td_tfidf_info = tfidfDoc_info
 
-		return self.td_bow, self.td_bow_sublin, self.td_tfidf
+		return self.td_bow, self.td_bow_info, self.td_bow_sublin, self.td_bow_sublin_info, self.td_tfidf, self.td_tfidf_info
 
   
 	# create BOW dictionary list (term frequency)
@@ -88,32 +99,44 @@ class VectorSpace:
 	def createBOW(self, tokenized_documents):
 
 		bow_matrix = []
+		bow_td_matrix = []
 
 		print('creating Bag-of-words matrix...')
 		
+		i = 0
 		for doc in tokenized_documents:
 			row_vec = []
+			row_term_vec = []
 			for term in self.word_index.values():
 				tf = self.countFrequency(term, doc)
 				row_vec.append(tf)
+				row_term_vec.append((term,tf))
 			bow_matrix.append(row_vec)
+			bow_td_matrix.append((i,row_term_vec))
+			i += 1
 
-		return bow_matrix
+		return bow_matrix, bow_td_matrix
 
 	def createSublinearBOW(self, tokenized_documents):
 
 		bow_matrix = []
+		bow_td_matrix = []
 
 		print('creating Bag-of-words matrix with sublinear smoothing...')
 		
+		i = 0
 		for doc in tokenized_documents:
 			row_vec = []
+			row_term_vec = []
 			for term in self.word_index.values():
 				tf = self.sublinearTf(term, doc)
 				row_vec.append(tf)
+				row_term_vec.append((term,tf))
 			bow_matrix.append(row_vec)
+			bow_td_matrix.append((i,row_term_vec))
+			i += 1
 
-		return bow_matrix
+		return bow_matrix, bow_td_matrix
 
 	def docFrequency(self, term, tokenized_documents):
 		count = 0
@@ -142,8 +165,12 @@ class VectorSpace:
 
 
 		tfidfDoc = []
+		tfidfDoc_info = []
+
+		i = 0
 		for doc in tokenized_documents:
 			tfidf = []
+			tfidf_term = []
 			for term in self.word_index.values():
 				#tf = self.sublinearTf(term, doc)
 				tf = self.countFrequency(term, doc)
@@ -155,9 +182,13 @@ class VectorSpace:
 				idf = math.log( (1 + len(tokenized_documents)) / float(self.docFrequency(term, tokenized_documents)))
 
 				tfidf.append(tf * idf)
-			tfidfDoc.append(tfidf)
+				tfidf_term.append((term,(tf * idf)))
 
-		return tfidfDoc
+			tfidfDoc.append(tfidf)
+			tfidfDoc_info.append((i,tfidf_term))
+			i += 1
+
+		return tfidfDoc, tfidfDoc_info
 
 	
 	

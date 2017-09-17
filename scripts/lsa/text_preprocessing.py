@@ -11,11 +11,10 @@ from __future__ import print_function
 
 import os
 import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 import tarfile
 import zipfile
-import re
 import pandas as pd
 import numpy as np
 import math
@@ -31,9 +30,6 @@ from collections import defaultdict
 from collections import namedtuple
 import argparse
 import logging
-from bs4 import BeautifulSoup
-import html2text  # another alternative of bs4, perserving url link
-from lsa.tokenizer import Tokenizer
 from gensim.models import Word2Vec
 #import deepdish as dd
 
@@ -195,40 +191,6 @@ def convert(data):
 	else:
 		return data
 
-def textToTokens(text):
-
-	tokenizer = Tokenizer()
-
-	tokens = nltk.word_tokenize(text.decode('utf-8','ignore'))
-	
-
-	# remove stopwords and stemming
-	tokenSw = tokenizer._remove_stop_words(tokens)
-	tokenStem = tokenizer._stemming(tokenSw)
-
-	return tokens, tokenStem
-
-
-# input here is tokenized document in dictionary format
-def indexVocab(datadictionary):
-
-	# generate tokens from subject title
-	arrTokens = [value for key, value in datadictionary.items()]
-	wordTokens = sum(arrTokens,[])
-
-	# frequency of word across document corpus
-	tf = nltk.FreqDist(itertools.chain(*wordTokens)) 
-	wordIndex = tf.keys()
-	# add 'zero' as the first vocab and 'UNK' as unknown words
-	wordIndex.insert(0,'SOF')
-	wordIndex.append('EOF')
-	wordIndex.append('UNK')
-	# indexing word vocabulary : pairs of (index,word)
-	vocab=dict([(i,wordIndex[i]) for i in range(len(wordIndex))])
-
-	return vocab, tf 
-
-
 # convert sentences (in words form) to array list of numbers
 # vocab here is dictionary pairs of (index, word)
 # word sentence is original sentence (array of word tokens in a document ['','',''])
@@ -249,41 +211,6 @@ def indexToWords(vocab,numSentence):
 	return revertSentence
 
 
-# in different server setting, the library may requires soup = BeautifulSoup(text, "lxml") or BeautifulSoup(text, "html5lib")
-def htmlToTextBS(text):
-	#soup = BeautifulSoup(text, "lxml")
-	soup = BeautifulSoup(text,'html.parser')
-
-	for script in soup(["script", "style"]):
-		script.extract()
-
-	txt = soup.get_text()
-	# eliminate multiple line break (if anys)
-	txt =  re.sub(r'\n\s*\n', '\n\n', txt)
-
-	# split into raw sentence according to line breaks
-	# this probably need to be checked further if one line include more than 1 sentence 
-	arrayTxt = txt.encode("ascii","ignore").split("\n") 
-
-	rawSentences=[]
-	for text in arrayTxt:
-		tmp = text.strip()
-		if tmp != "":
-			rawSentences.append(tmp)
-
-	return rawSentences
-
-# we don't use this function
-def htmlToText(text):
-
-	# this will return text, including URL links
-
-	txt = html2text.html2text(text)
-
-	return txt
-
-
-
 # tokenized unlabelled corpus
 # and generate vocabulary word list
 # for short text document (single sentence)
@@ -292,7 +219,7 @@ def generateSentVocab(documents):
 
 	docwords = []
 	alltokens = []
-	# tokenized words per sentence 
+    # tokenized words per sentence 
 	for text in documents:
 		txt = str(text).lower()
 		tmp = nltk.word_tokenize(txt.decode('utf-8','ignore'))
@@ -325,7 +252,7 @@ def generateDocVocab(documents):
 	docwords = []
 	docsents = []
 
-	# tokenized words per document
+    # tokenized words per document
 	for text in documents:
 		txt = str(text).lower()
 		tmp = nltk.word_tokenize(txt.decode('utf-8','ignore'))
@@ -683,7 +610,7 @@ def generateMailVocab(datadictionary):
 ################################################
 def endOfSentence(i, docTokens):
 	
-	return docTokens[i] in ('.','?','!', ';',':') and (i == len(docTokens) - 1 or not docTokens[i+1] in ('.','?','!', ';', ':'))
+	return docTokens[i] in ('.','?','!', ';',':','*','``') and (i == len(docTokens) - 1 or not docTokens[i+1] in ('.','?','!', ';', ':','*','``'))
 
 
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #__author__ = "@tita"
 #__date__ = "20.05.2017"
-#__update__ = "14.06.2017"
+#__update__ = "09.09.2017"
 #__maintainer__ = "@tita"
 #__email__ = "i.nimah@tue.nl"
 
@@ -19,11 +19,14 @@ from lsa.tokenizer import Tokenizer
 
 
 
-ENRON_PATH = '/home/inimah/exp/data/maildata/enron/preprocessed'
+SPAMAS_PATH = '/home/inimah/exp/data/maildata/spamassasin'
+
+#SPAMAS_PATH = '../data/spamassasin'
 
 '''
 main function : _tokenizedText(), _indexVocab() is in text_preprocessing
 '''
+
 
 # this function only applies for subject tokenized text	
 def _encodeText(dataDictionary, vocab):
@@ -50,7 +53,7 @@ def extractSubject(datadictionary):
 			with open(mail) as f:
 				for i,line in enumerate(f):
 					# extract subject title
-					if (i==0 and "Subject:" in line):
+					if "Subject:" in line:
 						tmpSubj = line
 						# get tokenized subject title
 						lSubj = tmpSubj.lower()
@@ -88,7 +91,7 @@ def extractContent(datadictionary):
 			with open(mail) as f:
 				for i,line in enumerate(f):
 					if i >= lineCont:
-						textContent += line 
+						textContent += line.lower()
 				
 					# extract the content of mail
 					
@@ -150,13 +153,22 @@ def unionList(list1,list2):
 
 	return list1
 
-
-
 if __name__ == '__main__':
+
 	# get list of data files
-	filenames = listData(ENRON_PATH)
+	filenames = listData(SPAMAS_PATH)
 	# grouped by class
 	datadict = getClassLabel(filenames)
+
+	'''
+	Statistic of Spamassasin data sets
+	len(filenames) = 9349
+	len(datadict['spam']) = 2398
+	len(datadict['easy_ham']) = 6451
+	len(datadict['hard_ham']) = 500
+
+	'''
+
 
 	# return text of subject and content of mail (since Spamassasin data is raw ones and contain alot of noises)
 	subjectMail = extractSubject(datadict)
@@ -207,6 +219,8 @@ if __name__ == '__main__':
 			newSent.append(newText)
 		newContent[i] = newSent
 
+			
+	
 
 	# 1. remove punctuations other than EOS characters (if anys)
 	# 2. and tokenize documents (list of sentences in this case)
@@ -362,18 +376,41 @@ if __name__ == '__main__':
 		newTokenContSW = newTokenizedSW
 		newDict = datadict
 
+	'''
 
+	In [165]: len(newTokenSubj['easy_ham'])
+	Out[165]: 6449
 
-	
+	In [166]: len(newTokenSubj['hard_ham'])
+	Out[166]: 500
+
+	In [167]: len(newTokenSubj['spam'])
+	Out[167]: 2379
+	'''
 
 	####################################################
 	# Generate vocab from subject title
 	####################################################
 
-	subjVocab = indexVocab(newTokenSubj)
-	subjSWVocab = indexVocab(newTokenSubjSW)
+	subjVocab, subjVocabTF = indexVocab(newTokenSubj)
+	subjSWVocab, subjSWVocabTF = indexVocab(newTokenSubjSW)
 
-	
+	'''
+	In [17]: len(subjVocab)
+	Out[17]: 7328
+
+	In [21]: len(subjVocabTF)
+	Out[21]: 7325
+
+	In [23]: len(subjSWVocab)
+	Out[23]: 6182
+
+	In [24]: len(subjSWVocabTF)
+	Out[24]: 6179
+
+
+
+	'''
 
 	####################################################
 	# Generate vocab from mail content
@@ -404,7 +441,24 @@ if __name__ == '__main__':
 	contVocab, contVocabTF = indexVocab(mergeCont)
 
 	# vocab for tokens with stopword elimination and stemming
-	contSWVocab, contSWVocabTF = indexVocab(mergeCont)
+	contSWVocab, contSWVocabTF = indexVocab(mergeContSW)
+
+	'''
+	In [36]: len(contVocab)
+	Out[36]: 120774
+
+	In [37]: len(contVocabTF)
+	Out[37]: 120771
+
+	In [39]: len(contSWVocab)
+	Out[39]: 105089
+
+	In [40]: len(contSWVocabTF)
+	Out[40]: 105086
+
+
+	'''
+
 
 	'''
 
@@ -457,59 +511,57 @@ if __name__ == '__main__':
 
 	# save pre-processed text of mail's subject title and content
 	# original data sets
-	savePickle(subjectMail,'enron_textSubjects')
-	savePickle(contentMailCleaned,'enron_textContent')
+	savePickle(subjectMail,'spamas_textSubjects')
+	savePickle(contentMailCleaned,'spamas_textContent')
 
 	# store information - updating data after reduction
-	savePickle(newIndex,'enron_emptyIndex')
-	savePickle(newDict,'enron_dataDict')
+	savePickle(newIndex,'spamas_emptyIndex')
+	savePickle(newDict,'spamas_dataDict')
 
 
 	# save tokenized documents 
 	# for subject	
-	savePickle(newTokenSubj,'enron_tokenSubj')
-	savePickle(newTokenSubjSW,'enron_tokenSubjSW')
+	savePickle(newTokenSubj,'spamas_tokenSubj')
+	savePickle(newTokenSubjSW,'spamas_tokenSubjSW')
 	# For mail content, 2 versions are stored:
 	# content without splitting into sentences
-	savePickle(mergeCont,'enron_mergeTokenCont')
-	savePickle(mergeContSW,'enron_mergeTokenContSW')
+	savePickle(mergeCont,'spamas_mergeTokenCont')
+	savePickle(mergeContSW,'spamas_mergeTokenContSW')
 	# content with splitting into tokenized sentences
-	savePickle(newTokenCont,'enron_tokenCont')
-	savePickle(newTokenContSW,'enron_tokenContSW')
+	savePickle(newTokenCont,'spamas_tokenCont')
+	savePickle(newTokenContSW,'spamas_tokenContSW')
 
 
 	# save vocabulary list
 	# for subject
-	savePickle(subjVocab,'enron_subjVocab')
-	savePickle(subjSWVocab,'enron_subjSWVocab')
+	savePickle(subjVocab,'spamas_subjVocab')
+	savePickle(subjVocabTF,'spamas_subjVocabTF')
+	savePickle(subjSWVocab,'spamas_subjSWVocab')
+	savePickle(subjSWVocabTF,'spamas_subjSWVocabTF')
+
 	# for content
-	savePickle(contVocab,'enron_contVocab')
-	savePickle(contVocab,'enron_contVocabTF')
-	savePickle(contSWVocab,'enron_contSWVocab')
-	savePickle(contSWVocabTF,'enron_contSWVocabTF')
+	savePickle(contVocab,'spamas_contVocab')
+	savePickle(contVocabTF,'spamas_contVocabTF')
+	savePickle(contSWVocab,'spamas_contSWVocab')
+	savePickle(contSWVocabTF,'spamas_contSWVocabTF')
 
 	'''
-	In [3]: len(enron_contSWVocab)
-	Out[3]: 155580
 
-	In [5]: len(enron_contVocab)
-	Out[5]: 155580
+	In [33]: len(spamas_contVocab)
+	Out[33]: 120774
 
 
-	In [15]: len(enron_subjVocab[0])
-	Out[15]: 17824
+	In [38]: len(spamas_subjVocab[0])
+	Out[38]: 7328
 
-	In [16]: len(enron_subjVocab[1])
-	Out[16]: 17821
-
-	In [17]: len(enron_subjSWVocab[0])
-	Out[17]: 14696
-
-	In [18]: len(enron_subjSWVocab[1])
-	Out[18]: 14693
-
+	In [39]: len(spamas_subjVocab[1])
+	Out[39]: 7325
 
 
 
 	'''
+
+
+	
+
 
