@@ -990,14 +990,17 @@ def shuffleSentences(numericSentences):
 	return sentences
 
 
-# matrix vectorization for sentences in a document (3D matrix, i: n sentences in a document, j: time_steps or length of a sentence, k: )
-# turn a numeric sequence of words in a sentence  into one-hot vector
-def sentenceMatrixVectorization(sentences,maxlenSentence,nVocab):
+# return a numeric sequence of words in a sentence  into one-hot vector
+# this is for last layer with time distributed (3D dimension)
+# the text input is whole text of documents (without splitting into sentences)
+def matrixVectorization3D(docs,timesteps,vocab_length):
 	# create zero matrix
-	sequences = np.zeros((len(sentences), maxlenSentence, nVocab))
-	for i, sentence in enumerate(sentences):
-		for j, word in enumerate(sentence):
-			sequences[i, j, word] = 1
+	sequences = np.zeros((len(docs), timesteps, vocab_length))
+	# the encoding here is also the index of word in vocabulary list as such 
+	# it is the index of one hot vector with '1' value
+	for i, text in enumerate(docs):
+		for j, word_index in enumerate(text):
+			sequences[i, j, word_index] = 1
 	return sequences
 
 

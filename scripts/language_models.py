@@ -267,6 +267,7 @@ def languageModel1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 	return model
 
+# USE THIS ONE (lm1a model)
 # with keras functional API
 # full encoder - decoder model 
 # apply for TimeDistributed layer
@@ -293,29 +294,32 @@ def languageModel2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 	'''
 	_________________________________________________________________
-	Layer (type)                 Output Shape              Param #   
+	_________________________________________________________________
+	Layer (type)                 Output Shape              Param #
 	=================================================================
-	input_1 (InputLayer)         (None, 1000)              0         
+	input_1 (InputLayer)         (None, 25)                0
 	_________________________________________________________________
-	embedding_1 (Embedding)      (None, 1000, 100)         8056300    -
+	embedding_layer (Embedding)  (None, 25, 50)            140700
 	_________________________________________________________________
-	lstm_1 (LSTM)                (None, 100)               80400      -> doc vector
+	lstm_enc (LSTM)              (None, 50)                20200
 	_________________________________________________________________
-	encoder_repeat (RepeatVector (None, 1000, 100)         0         
+	encoder_repeat (RepeatVector (None, 25, 50)            0
 	_________________________________________________________________
-	lstm_dec_3 (LSTM)            (None, 1000, 100)         80400     
+	lstm_dec_2 (LSTM)            (None, 25, 50)            20200
 	_________________________________________________________________
-	time_distributed_1 (TimeDist (None, 1000, 2)           202       
+	time_distributed_1 (TimeDist (None, 25, 2814)          143514
 	=================================================================
-	Total params: 8,217,302
-	Trainable params: 8,217,302
+	Total params: 324,614
+	Trainable params: 324,614
 	Non-trainable params: 0
 	_________________________________________________________________
+
 
 	'''
 
 	return model
 
+# USE THIS ONE (lm1b model)
 # with Bidirectional LSTM
 def languageModel3(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
@@ -324,13 +328,13 @@ def languageModel3(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
-	lstm_layer = Bidirectional(LSTM(hidden_size, name='lstm_enc_1'))(embedded_layer)
+	lstm_layer = Bidirectional(LSTM(hidden_size),name='bilstm_enc')(embedded_layer)
 	encoder_output = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(lstm_layer)
 
 	# Creating decoder network
 	# objective function: predicting next words (language model)
 	for i in range(num_layers):
-		decoder_layer = Bidirectional(LSTM(hidden_size, return_sequences=True,name='lstm_dec_%s'%(i+2)))(encoder_output)
+		decoder_layer = Bidirectional(LSTM(hidden_size, return_sequences=True),name='bilstm_dec_%s'%(i))(encoder_output)
 	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax', name='dense_output'))(decoder_layer)
 	model = Model(sequence_input, prediction)
 
@@ -339,29 +343,35 @@ def languageModel3(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 	'''
 	_________________________________________________________________
-	Layer (type)                 Output Shape              Param #   
+	Layer (type)                 Output Shape              Param #
 	=================================================================
-	input_1 (InputLayer)         (None, 1000)              0         
+	input_1 (InputLayer)         (None, 25)                0
 	_________________________________________________________________
-	embedding_1 (Embedding)      (None, 1000, 100)         8056300    -
+	embedding_layer (Embedding)  (None, 25, 50)            140700
 	_________________________________________________________________
-	lstm_1 (LSTM)                (None, 100)               80400      -> doc vector
+	bidirectional_1 (Bidirection (None, 50)                15200
 	_________________________________________________________________
-	encoder_repeat (RepeatVector (None, 1000, 100)         0         
+	encoder_repeat (RepeatVector (None, 25, 50)            0
 	_________________________________________________________________
-	lstm_dec_3 (LSTM)            (None, 1000, 100)         80400     
+	bidirectional_4 (Bidirection (None, 25, 50)            15200
 	_________________________________________________________________
-	time_distributed_1 (TimeDist (None, 1000, 2)           202       
+	time_distributed_1 (TimeDist (None, 25, 2814)          143514
 	=================================================================
-	Total params: 8,217,302
-	Trainable params: 8,217,302
+	Total params: 314,614
+	Trainable params: 314,614
 	Non-trainable params: 0
 	_________________________________________________________________
+
 
 	'''
 
 	return model
 
+# WON'T USE THIS ONE
+# THIS IS NOT POSSIBLE 
+# (OK IT'S POSSIBLE - BUT LAST LAYER WILL ONLY PREDICT WORDS INSIDE THAT SEQUENCE NOT FROM THE VOCABULARY LIST)
+# Since the output should be in 3D matrix shape e.g. (9326, 25, 2814)
+# except that we merge/concatenate the one hot vector 
 # with keras functional API
 # only encoder
 # apply for Dense layer
@@ -373,34 +383,43 @@ def languageModel4(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
-	lstm_layer = LSTM(hidden_size, name='lstm_enc')(embedded_layer)
+	encoder_layer = LSTM(hidden_size, name='lstm_enc')(embedded_layer)
 
-	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(lstm_layer)
+	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(encoder_layer)
 	model = Model(sequence_input, prediction)
 
 	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
 
 	'''
-	________________________________________________________________
-	Layer (type)                 Output Shape              Param #   
+	_________________________________________________________________
+	Layer (type)                 Output Shape              Param #
 	=================================================================
-	input_1 (InputLayer)         (None, 1000)              0         
+	input_1 (InputLayer)         (None, 25)                0
 	_________________________________________________________________
-	embedding_1 (Embedding)      (None, 1000, 100)         8056300   
+	embedding_layer (Embedding)  (None, 25, 50)            140700
 	_________________________________________________________________
-	lstm_1 (LSTM)                (None, 100)               80400     
+	lstm_enc (LSTM)              (None, 50)                20200
 	_________________________________________________________________
-	dense_output (Dense)         (None, 2)                 202       
+	dense_output (Dense)         (None, 2814)              143514
 	=================================================================
-	Total params: 8,136,902
-	Trainable params: 8,136,902
+	Total params: 304,414
+	Trainable params: 304,414
 	Non-trainable params: 0
+	_________________________________________________________________
+	None
+
 
 	'''
 
 	return model
 
+
+# WON'T USE THIS ONE
+# THIS IS NOT POSSIBLE 
+# (OK IT'S POSSIBLE - BUT LAST LAYER WILL ONLY PREDICT WORDS INSIDE THAT SEQUENCE NOT FROM THE VOCABULARY LIST)
+# Since the output should be in 3D matrix shape e.g. (9326, 25, 2814)
+# except that we merge/concatenate the one hot vector 
 # with bidirectional LSTM
 def languageModel5(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
@@ -409,9 +428,9 @@ def languageModel5(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
-	lstm_layer = Bidirectional(LSTM(hidden_size, name='lstm_enc'))(embedded_layer)
+	encoder_layer = Bidirectional(LSTM(hidden_size),name='bilstm_enc')(embedded_layer)
 
-	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(decoder_layer)
+	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(encoder_layer)
 	model = Model(sequence_input, prediction)
 
 	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
@@ -419,21 +438,25 @@ def languageModel5(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 	'''
 	________________________________________________________________
-	Layer (type)                 Output Shape              Param #   
+	_________________________________________________________________
+	Layer (type)                 Output Shape              Param #
 	=================================================================
-	input_1 (InputLayer)         (None, 1000)              0         
+	input_1 (InputLayer)         (None, 25)                0
 	_________________________________________________________________
-	embedding_1 (Embedding)      (None, 1000, 100)         8056300   
+	embedding_layer (Embedding)  (None, 25, 50)            140700
 	_________________________________________________________________
-	lstm_1 (LSTM)                (None, 100)               80400     
+	bilstm_enc (Bidirectional)   (None, 50)                15200
 	_________________________________________________________________
-	dense_output (Dense)         (None, 2)                 202       
+	dense_output (Dense)         (None, 2814)              143514
 	=================================================================
-	Total params: 8,136,902
-	Trainable params: 8,136,902
+	Total params: 299,414
+	Trainable params: 299,414
 	Non-trainable params: 0
+	_________________________________________________________________
+	None
 
 	'''
+
 
 	return model
 
