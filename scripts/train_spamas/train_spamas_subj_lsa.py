@@ -36,16 +36,32 @@ if __name__ == '__main__':
 
 	# reading stored pre-processed (in pickle format)
 
-	'''
+	# Final vocabulary list after being reduced from less frequent words (links, noises)
+	subject_vocab = readPickle(os.path.join(PATH,'spamas_reducedVocab'))
+	subjectSW_vocab = readPickle(os.path.join(PATH,'spamas_reducedVocabSW'))
 
-	
+	# Final tokenized documents with labels 
+	subject = readPickle(os.path.join(PATH,'spamas_fin_labelled_subj'))
+	subjectSW = readPickle(os.path.join(PATH,'spamas_fin_labelled_subjSW'))
+
+	tokenized_docs = []
+	class_labels = []
+	for i, data in enumerate(subject):
+		class_labels.append(data[0])
+		tokenized_docs.append(data[1])
+
+	tokenized_docsSW = []
+	class_labelsSW = []
+	for i, data in enumerate(subjectSW):
+		class_labelsSW.append(data[0])
+		tokenized_docsSW.append(data[1])
 
 	############################
 	# Matrix decomposition
 	# without stopwords elimination and stemming
 
 
-	vs = VectorSpace(tokenized_docs,vocab)
+	vs = VectorSpace(tokenized_docs,subject_vocab)
 
 	# save matrices: BOW, sub-linear BOW, 
 	savePickle(vs.td_bow,'spamas_lsa_td_bow')
@@ -61,13 +77,14 @@ if __name__ == '__main__':
 	savePickle(td_tfidf,'spamas_lsa_td_tfidf')
 	savePickle(vs.td_tfidf_info,'spamas_lsa_td_tfidf_info')
 
+
 	############################
 	# matrix decomposition of BOW
 
 	# transpose input matrix (originally doc x term dimension -> to term x doc dimension)
 	bow_t = np.transpose(vs.td_bow)
 
-	# eliminate non-occur words in document corpus (due to sampling)
+	# eliminate non-occur words in document corpus (due to sampling if anys)
 	bow_null_ind = np.where(~bow_t.any(axis=1))[0]
 	savePickle(bow_null_ind,'spamas_lsa_bow_null_ind')
 
@@ -127,14 +144,12 @@ if __name__ == '__main__':
 	savePickle(lsa_tfidf.transformed_matrix,'spamas_svd_tfidf')
 
 
-	
-
 	############################
 	# Matrix decomposition
 	# with stopwords elimination and stemming
 
 	
-	vs_SW = VectorSpace(tokenized_docsSW,vocabSW)
+	vs_SW = VectorSpace(tokenized_docsSW,subjectSW_vocab)
 
 	# save matrices: BOW, sub-linear BOW, 
 	savePickle(vs_SW.td_bow,'spamas_lsa_td_bowSW')
@@ -215,42 +230,8 @@ if __name__ == '__main__':
 	savePickle(lsa_tfidfSW.vt,'spamas_lsa_tfidf_vtSW')
 	savePickle(lsa_tfidfSW.transformed_matrix,'spamas_svd_tfidfSW')
 
-	'''
 
-	# Final vocabulary list after being reduced from less frequent words (links, noises)
-	subject_vocab = readPickle(os.path.join(PATH,'spamas_reducedVocab'))
-	subjectSW_vocab = readPickle(os.path.join(PATH,'spamas_reducedvocabSW'))
-
-	# Final tokenized documents with maximum word length = 25 words
-	# with labels 
-	subject = readPickle(os.path.join(PATH,'spamas_fin_labelled_subj'))
 	
-	# for tokenized subject title with stopword removing and stemming, have not been preprocessed yet
-	# as such it is run here
-	pre_subjectSW = readPickle(os.path.join(PATH,'spamas_reducedTokenSubjSW'))
-
-	labelled_subjSW = []
-	for i in pre_subjectSW:
-		for j, tokens in enumerate(pre_subjectSW[i]):
-			labelled_subjSW.append((i,tokens))
-
-	# discard subjects with number of words > 25 (as being seen in statistics of subject title)
-	subjectSW = []
-	for i, data in enumerate(labelled_subjSW):
-		if len(data[1]) <= 25:
-			subjectSW.append((data[0],data[1]))
-
-	# save reduced versioned of labelled tokenized documents
-	savePickle(subjectSW,'spamas_fin_labelled_subjSW')
-
-	# Encode text into numerical tokenized format
-	encoded_docsSW = _encodeLabelledText(subjectSW,subjectSW_vocab)
-	savePickle(encoded_docsSW,'spamas_fin_encoded_subjSW')
-
-	# check statistic of each class (maximum - average number of words per class)
-	count_wordsSW = _countWord(encoded_docsSW)
-	savePickle(count_wordsSW,'spamas_count_wordsSW')
-
 
 
 

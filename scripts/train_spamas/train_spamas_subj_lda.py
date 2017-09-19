@@ -28,170 +28,33 @@ PATH = '/home/inimah/git/Neural-Language-Models/scripts/train_spamas/subj/lda/'
 
 if __name__ == '__main__':
 
-	'''
+	
 
 	# reading stored pre-processed (in pickle format)
 
-	# Vocabulary
-	subject_vocab = readPickle(os.path.join(PATH,'spamas_subjVocab'))
-	subject_vocabTF = readPickle(os.path.join(PATH,'spamas_subjVocabTF'))
-	subjectSW_vocab = readPickle(os.path.join(PATH,'spamas_subjSWVocab'))
-	subjectSW_vocabTF = readPickle(os.path.join(PATH,'spamas_subjSWVocabTF'))
+	# Final vocabulary list after being reduced from less frequent words (links, noises)
+	subject_vocab = readPickle(os.path.join(PATH,'spamas_reducedVocab'))
+	subjectSW_vocab = readPickle(os.path.join(PATH,'spamas_reducedVocabSW'))
 
-	# Tokenized documents
-	subject = readPickle(os.path.join(PATH,'spamas_tokenSubj'))
-	subjectSW = readPickle(os.path.join(PATH,'spamas_tokenSubjSW'))
-
-	# discard words with frequency less than 5
-	tmp1=[]  
-	wordIndex = []
-	for k,v in subject_vocabTF.iteritems():
-		if v<3:
-			tmp1.append((k,v))
-		else:
-			wordIndex.append(k)
-	wordIndex.insert(0,'SOF')
-	wordIndex.append('EOF')
-	wordIndex.append('UNK')
-	vocab=dict([(i,wordIndex[i]) for i in range(len(wordIndex))])
-
-	# length of vocab after being discarded
-	
-	#In [5]: len(vocab)
-	#Out[5]: 2814
-	
-
-	tmp2=[]  
-	wordIndexSW = []
-	for k,v in subjectSW_vocabTF.iteritems():
-		if v<3:
-			tmp2.append((k,v))
-		else:
-			wordIndexSW.append(k)
-	wordIndexSW.insert(0,'SOF')
-	wordIndexSW.append('EOF')
-	wordIndexSW.append('UNK')
-	vocabSW=dict([(i,wordIndexSW[i]) for i in range(len(wordIndexSW))])
+	# Final tokenized documents with labels 
+	subject = readPickle(os.path.join(PATH,'spamas_fin_labelled_subj'))
+	subjectSW = readPickle(os.path.join(PATH,'spamas_fin_labelled_subjSW'))
 
 	
-	#In [6]: len(vocabSW)
-	#Out[6]: 2467
 
-
-	savePickle(vocab,'spamas_reducedVocab')
-	savePickle(vocabSW,'spamas_reducedvocabSW')
-
-
-	# also discard less frequent words in tokenized documents based on new vocabulary list
-	new_subject = dict()
-	for i in subject:
-		tmp_docs = []
-		for j, tokens in enumerate(subject[i]):
-			tmp_tokens = []
-			for k, word in enumerate(tokens):
-				if word in vocab.values():
-					tmp_tokens.append(word)
-			tmp_docs.append(tmp_tokens)
-		new_subject[i] = tmp_docs
-
-	new_subjectSW = dict()
-	for i in subject:
-		tmp_docs = []
-		for j, tokens in enumerate(subject[i]):
-			tmp_tokens = []
-			for k, word in enumerate(tokens):
-				if word in vocab.values():
-					tmp_tokens.append(word)
-			tmp_docs.append(tmp_tokens)
-		new_subjectSW[i] = tmp_docs
-
-
-	savePickle(new_subject,'spamas_reducedTokenSubj')
-	savePickle(new_subjectSW,'spamas_reducedTokenSubjSW')
-
-	
-	#In [10]: len(new_subject['hard_ham'])
-	#Out[10]: 500
-	#In [11]: len(new_subject['easy_ham'])
-	#Out[11]: 6449
-	#In [12]: len(new_subject['spam'])
-	#Out[12]: 2379
-
-	#Total docs = 9328
-
-
-
-	# sampling 500 documents from each class
-	sampling_subj = dict()
-	for i in new_subject:
-		tmp = []
-		for j, tokens in enumerate(new_subject[i]):
-			if j<500:
-				tmp.append(tokens)
-		sampling_subj[i] = tmp
-
-	sampling_subjSW = dict()
-	for i in new_subjectSW:
-		tmp = []
-		for j, tokens in enumerate(new_subjectSW[i]):
-			if j<500:
-				tmp.append(tokens)
-		sampling_subjSW[i] = tmp
-
-	savePickle(sampling_subj,'spamas_sampling_subj')
-	savePickle(sampling_subjSW,'spamas_sampling_subjSW')
-
-	
-	# For tokenized document without Stopword elimination and stemming
-	# merge all array and class labels
-	labelled_subj = []
-	for i in sampling_subj:
-		for j, tokens in enumerate(sampling_subj[i]):
-			labelled_subj.append((i,tokens))
-
-	
-	#In [17]: len(labelled_subj)
-	#Out[17]: 9328
-
-	'''
-
-	labelled_subj = readPickle(os.path.join(PATH,'spamas_labelled_subj'))
 	
 	tokenized_docs = []
 	class_labels = []
-	for i, data in enumerate(labelled_subj):
+	for i, data in enumerate(subject):
 		class_labels.append(data[0])
 		tokenized_docs.append(data[1])
 
-	#savePickle(labelled_subj,'spamas_labelled_subj')
-	savePickle(tokenized_docs,'spamas_lda_tokenized_docs')
-	savePickle(class_labels,'spamas_lda_class_labels')
-
-	'''
-
-	# For tokenized document with Stopword elimination and stemming
-	labelled_subjSW = []
-	for i in sampling_subjSW:
-		for j, tokens in enumerate(sampling_subjSW[i]):
-			labelled_subjSW.append((i,tokens))
-
-	'''
-
-	labelled_subjSW = readPickle(os.path.join(PATH,'spamas_labelled_subjSW'))
-
 	tokenized_docsSW = []
 	class_labelsSW = []
-	for i, data in enumerate(labelled_subjSW):
+	for i, data in enumerate(subjectSW):
 		class_labelsSW.append(data[0])
 		tokenized_docsSW.append(data[1])
-
-	savePickle(tokenized_docs,'spamas_lda_tokenized_docsSW')
-	savePickle(class_labels,'spamas_lda_class_labelsSW')
-
-	vocab = readPickle(os.path.join(PATH,'spamas_reducedVocab'))
-	vocabSW = readPickle(os.path.join(PATH,'spamas_reducedvocabSW'))
-
-	#savePickle(labelled_subjSW,'spamas_labelled_subjSW')
+	
 
 
 	########################################################
@@ -199,7 +62,7 @@ if __name__ == '__main__':
 	########################################################
 
 	
-	vs = VectorSpace(tokenized_docs,vocab)
+	vs = VectorSpace(tokenized_docs,subject_vocab)
 
 	td_bow = np.array(vs.td_bow, dtype='int64')
 	td_sublinbow = np.array(vs.td_bow_sublin, dtype='int64')
@@ -256,7 +119,7 @@ if __name__ == '__main__':
 	# LDA on TFIDF matrix
 
 	# default iteration = 1000
-	model_tfidf = lda.LDA(n_topics=100, n_iter=1000, random_state=1)
+	model_tfidf = lda.LDA(n_topics=5, n_iter=1000, random_state=1)
 	model_tfidf.fit(td_tfidf_arr)
 	topic_word_tfidf = model_tfidf.topic_word_
 	topic_doc_tfidf = model_tfidf.doc_topic_
@@ -271,7 +134,7 @@ if __name__ == '__main__':
 	########################################################
 
 
-	vsSW = VectorSpace(tokenized_docsSW,vocabSW)
+	vsSW = VectorSpace(tokenized_docsSW,subjectSW_vocab)
 
 	td_bowSW = np.array(vsSW.td_bow, dtype='int64')
 	td_sublinbowSW = np.array(vsSW.td_bow_sublin, dtype='int64')
