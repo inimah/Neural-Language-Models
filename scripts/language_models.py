@@ -100,7 +100,7 @@ def wordEmbedding(documents, vocab, argsize, argiter):
 		embedding2[i, :] = word2vec_weights2[word2vec_vocab2[w], :]
 
 	
-	return model1, model2, embedding1, embedding2
+	return model1, model2, embedding1, embedding2, word2vec_vocab1, word2vec_vocab2, word2vec_weights1, word2vec_weights2
 
 ################################################
 # doc2vec models
@@ -143,12 +143,16 @@ def docEmbedding(documents, vocab, argsize, argiter):
 	model2.train(documents, total_examples=n_examples, epochs=argiter)
 	model3.train(documents, total_examples=n_examples, epochs=argiter)
 
+	doc2vec_wv1 = model1.wv.syn0
+	doc2vec_wv2 = model2.wv.syn0
+	doc2vec_wv3 = model3.wv.syn0
+
 
 	doc2vec_weights1 = np.array(model1.docvecs)
 	doc2vec_weights2 = np.array(model2.docvecs)
 	doc2vec_weights3 = np.array(model3.docvecs)
 
-	return model1, model2, model3, doc2vec_weights1, doc2vec_weights2, doc2vec_weights3
+	return model1, model2, model3, doc2vec_weights1, doc2vec_weights2, doc2vec_weights3, doc2vec_vocab1, doc2vec_vocab2, doc2vec_vocab3, doc2vec_wv1, doc2vec_wv2, doc2vec_wv3
 
 
 ################################################
@@ -240,9 +244,10 @@ def averageIdfWE(w2v_weights, vocab, documents):
 
 ################################################
 
+# NOT BEING USED AT THE MOMENT
 # with keras sequential model
 # full encoder - decoder model 
-def languageModel1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def languageModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 50
 	num_layers = 3
@@ -272,21 +277,21 @@ def languageModel1(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 # full encoder - decoder model 
 # apply for TimeDistributed layer
 
-def languageModel2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def languageModelLSTM(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 50
 	num_layers = 3
 
-	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), name='sequence_input', dtype='int64')
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
-	lstm_layer = LSTM(hidden_size, name='lstm_enc')(embedded_layer)
-	encoder_output = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(lstm_layer)
+	lstm_encoder = LSTM(hidden_size, name='lstm_encoder')(embedded_layer)
+	encoder_repeat = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(lstm_encoder)
 
 	# Creating decoder network
 	# objective function: predicting next words (language model)
 	for i in range(num_layers):
-		decoder_layer = LSTM(hidden_size, return_sequences=True,name='lstm_dec_%s'%(i))(encoder_output)
-	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax', name='dense_output'))(decoder_layer)
+		lstm_decoder = LSTM(hidden_size, return_sequences=True,name='lstm_decoder_%s'%(i))(encoder_repeat)
+	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax'), name='td_prediction')(lstm_decoder)
 	model = Model(sequence_input, prediction)
 
 	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
@@ -297,22 +302,22 @@ def languageModel2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 	_________________________________________________________________
 	Layer (type)                 Output Shape              Param #
 	=================================================================
-	input_1 (InputLayer)         (None, 25)                0
+	sequence_input (InputLayer)  (None, 25)                0
 	_________________________________________________________________
 	embedding_layer (Embedding)  (None, 25, 50)            140700
 	_________________________________________________________________
-	lstm_enc (LSTM)              (None, 50)                20200
+	lstm_encoder (LSTM)          (None, 50)                20200
 	_________________________________________________________________
 	encoder_repeat (RepeatVector (None, 25, 50)            0
 	_________________________________________________________________
-	lstm_dec_2 (LSTM)            (None, 25, 50)            20200
+	lstm_decoder_2 (LSTM)        (None, 25, 50)            20200
 	_________________________________________________________________
-	time_distributed_1 (TimeDist (None, 25, 2814)          143514
+	td_prediction (TimeDistribut (None, 25, 2814)          143514
 	=================================================================
 	Total params: 324,614
 	Trainable params: 324,614
 	Non-trainable params: 0
-	_________________________________________________________________
+
 
 
 	'''
@@ -321,21 +326,21 @@ def languageModel2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 # USE THIS ONE (lm1b model)
 # with Bidirectional LSTM
-def languageModel3(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def languageModelBiLSTM(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 25
 	num_layers = 3
 
-	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), name='sequence_input', dtype='int64')
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
-	lstm_layer = Bidirectional(LSTM(hidden_size),name='bilstm_enc')(embedded_layer)
-	encoder_output = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(lstm_layer)
+	bilstm_encoder = Bidirectional(LSTM(hidden_size),name='bilstm_encoder')(embedded_layer)
+	encoder_repeat = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(bilstm_encoder)
 
 	# Creating decoder network
 	# objective function: predicting next words (language model)
 	for i in range(num_layers):
-		decoder_layer = Bidirectional(LSTM(hidden_size, return_sequences=True),name='bilstm_dec_%s'%(i))(encoder_output)
-	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax', name='dense_output'))(decoder_layer)
+		bilstm_decoder = Bidirectional(LSTM(hidden_size, return_sequences=True),name='bilstm_decoder_%s'%(i))(encoder_repeat)
+	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax'),name='td_prediction')(bilstm_decoder)
 	model = Model(sequence_input, prediction)
 
 	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
@@ -367,6 +372,53 @@ def languageModel3(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 
 	return model
 
+# USE THIS ONE (lm1c model)
+def languageModelGRU(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 50
+	num_layers = 3
+
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), name='sequence_input', dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	gru_encoder = GRU(hidden_size, name='gru_encoder')(embedded_layer)
+	encoder_repeat = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(gru_encoder)
+
+	# Creating decoder network
+	# objective function: predicting next words (language model)
+	for i in range(num_layers):
+		gru_decoder = GRU(hidden_size, return_sequences=True,name='gru_decoder_%s'%(i))(encoder_repeat)
+	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax'), name='td_prediction')(gru_decoder)
+	model = Model(sequence_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	return model
+
+# USE THIS ONE (lm1d model)
+def languageModelBiGRU(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 25
+	num_layers = 3
+
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), name='sequence_input', dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	bigru_encoder = Bidirectional(GRU(hidden_size),name='bigru_encoder')(embedded_layer)
+	encoder_repeat = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(bigru_encoder)
+
+	# Creating decoder network
+	# objective function: predicting next words (language model)
+	for i in range(num_layers):
+		bigru_decoder = Bidirectional(GRU(hidden_size, return_sequences=True),name='bigru_decoder_%s'%(i))(encoder_repeat)
+	prediction = TimeDistributed(Dense(VOCAB_LENGTH, activation='softmax'),name='td_prediction')(bigru_decoder)
+	model = Model(sequence_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	return model
+
+
 # WON'T USE THIS ONE
 # THIS IS NOT POSSIBLE 
 # (OK IT'S POSSIBLE - BUT LAST LAYER WILL ONLY PREDICT WORDS INSIDE THAT SEQUENCE NOT FROM THE VOCABULARY LIST)
@@ -376,7 +428,7 @@ def languageModel3(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 # only encoder
 # apply for Dense layer
 
-def languageModel4(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def languageModelLSTMDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 50
 	num_layers = 3
@@ -421,7 +473,7 @@ def languageModel4(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_w
 # Since the output should be in 3D matrix shape e.g. (9326, 25, 2814)
 # except that we merge/concatenate the one hot vector 
 # with bidirectional LSTM
-def languageModel5(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def languageModelBiLSTMDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 25
 	num_layers = 3

@@ -39,39 +39,7 @@ MODE = args['mode']
 
 PATH = '/home/inimah/git/Neural-Language-Models/scripts/prepdata/spamassasin'
 EMBED_PATH = '/home/inimah/git/Neural-Language-Models/scripts/train_spamas/subj/w2v'
-LM_PATH = '/home/inimah/git/Neural-Language-Models/scripts/train_spamas/subj/lm'
 
-def _encodeText(tokenized_docs, vocab):
-
-	# encode tokenized of words in document into its index/numerical value in vocabulary list
-	# the input is in array list tokenized documents
-
-	encoded_docs = []
-
-	for i, arrTokens in enumerate(tokenized_docs):
-		encoded_docs.append(wordsToIndex(vocab,arrTokens))
-
-	return encoded_docs
-
-def _encodeLabelledText(tokenized_docs, vocab):
-
-	# encode tokenized of words in document into its index/numerical value in vocabulary list
-	# the input is in array list tokenized documents
-
-	encoded_docs = []
-
-	for i, data in enumerate(tokenized_docs):
-		encoded_docs.append((data[0],wordsToIndex(vocab,data[1])))
-
-	return encoded_docs
-
-# from labelled tokenized documents
-def _countWord(tokenized_docs):
-	count_words = []
-	for i,data in enumerate(tokenized_docs):
-		count_ = len(data[1])
-		count_words.append((data[0],count_))
-	return count_words
 
 
 
@@ -94,10 +62,11 @@ if __name__ == '__main__':
 
 	# reading stored pre-processed (in pickle format)
 
-	# Vocabulary
+	# Final vocabulary list after being reduced from less frequent words (links, noises)
 	subject_vocab = readPickle(os.path.join(PATH,'spamas_reducedVocab'))
-	# Labelled tokenized documents
 
+	# Final encoded tokenized documents with labels 
+	
 	encoded_docs = readPickle(os.path.join(PATH,'spamas_fin_encoded_subj'))
 
 
@@ -156,7 +125,7 @@ if __name__ == '__main__':
 	X = pad_sequences(x_train, maxlen=MAX_SEQUENCE_LENGTH, dtype='int64')
 	Y = pad_sequences(y_train, maxlen=MAX_SEQUENCE_LENGTH, dtype='int64')
 	# encoding y output as one hot vector with dimension size of vocabulary
-	Y_encoded = sentenceMatrixVectorization(Y,MAX_SEQUENCE_LENGTH,VOCAB_LENGTH)
+	Y_encoded = matrixVectorization3D(Y,MAX_SEQUENCE_LENGTH,VOCAB_LENGTH)
 
 	# saving data into pickle ...
 	savePickle(traindat,'lm_traindat')
@@ -168,7 +137,7 @@ if __name__ == '__main__':
 
 	
 
-	model = languageModel2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_subj_embed1)
+	model = languageModelLSTM(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, w2v_subj_embed1)
 	model.fit(X, Y_encoded, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, callbacks=[history])
 
 	model.save('subj_LM1a.h5')
@@ -180,14 +149,14 @@ if __name__ == '__main__':
 
 	# embedding layer
 	embedSubj = Model(inputs=model.input, outputs=model.get_layer('embedding_layer').output)
-	word_embed_LM1a = embedSubj.predict(X)
-	savePickle(word_embed_LM1a,'word_embed_LM1a')
-	saveH5File('word_embed_LM1a.h5','word_embed_LM1a',word_embed_LM1a)
+	sent_embed_LM1a = embedSubj.predict(X)
+	#savePickle(word_embed_LM1a,'word_embed_LM1a')
+	saveH5File('sent_embed_LM1a.h5','sent_embed_LM1a',sent_embed_LM1a)
 
 	# encoder layer
-	encoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_enc').output)
+	encoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_encoder').output)
 	doc_embed_LM1a = encoderSubj.predict(X)
-	savePickle(doc_embed_LM1a,'doc_embed_LM1a')
+	#savePickle(doc_embed_LM1a,'doc_embed_LM1a')
 	saveH5File('doc_embed_LM1a.h5','doc_embed_LM1a',doc_embed_LM1a)
 
 	'''
@@ -197,14 +166,13 @@ if __name__ == '__main__':
 	'''
 
 	# decoder
-	decoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_dec_2').output)
-	doc_word_embed_LM1a = decoderSubj.predict(X)
-	savePickle(doc_word_embed_LM1a,'doc_word_embed_LM1a')
-	saveH5File('doc_word_embed_LM1a.h5','doc_word_embed_LM1a',doc_word_embed_LM1a)
+	decoderSubj = Model(inputs=model.input, outputs=model.get_layer('lstm_decoder_2').output)
+	doc_sent_embed_LM1a = decoderSubj.predict(X)
+	#savePickle(doc_word_embed_LM1a,'doc_word_embed_LM1a')
+	saveH5File('doc_sent_embed_LM1a.h5','doc_sent_embed_LM1a',doc_sent_embed_LM1a)
 
 	# output layer
 	output_pred = model.predict(X)
-	savePickle(output_pred,'embed_pred_LM1a')
 	saveH5File('embed_pred_LM1a.h5','output_pred',output_pred)
 
 

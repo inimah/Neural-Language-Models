@@ -21,8 +21,7 @@ import lda
 
 
 
-#PATH = '/home/inimah/git/Neural-Language-Models/scripts/prepdata/spamassasin'
-PATH = '/home/inimah/git/Neural-Language-Models/scripts/train_spamas/subj/lda/'
+PATH = '/home/inimah/git/Neural-Language-Models/scripts/prepdata/spamassasin'
 
 
 

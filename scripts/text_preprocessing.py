@@ -21,7 +21,7 @@ import numpy as np
 import math
 import random
 import codecs
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import nltk
 import itertools
 import cPickle
