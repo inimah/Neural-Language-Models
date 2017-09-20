@@ -286,7 +286,6 @@ def languageModelLSTM(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embeddin
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
 	lstm_encoder = LSTM(hidden_size, name='lstm_encoder')(embedded_layer)
 	encoder_repeat = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(lstm_encoder)
-
 	# Creating decoder network
 	# objective function: predicting next words (language model)
 	for i in range(num_layers):
@@ -335,7 +334,6 @@ def languageModelBiLSTM(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedd
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
 	bilstm_encoder = Bidirectional(LSTM(hidden_size),name='bilstm_encoder')(embedded_layer)
 	encoder_repeat = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(bilstm_encoder)
-
 	# Creating decoder network
 	# objective function: predicting next words (language model)
 	for i in range(num_layers):
@@ -382,7 +380,6 @@ def languageModelGRU(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
 	gru_encoder = GRU(hidden_size, name='gru_encoder')(embedded_layer)
 	encoder_repeat = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(gru_encoder)
-
 	# Creating decoder network
 	# objective function: predicting next words (language model)
 	for i in range(num_layers):
@@ -405,7 +402,6 @@ def languageModelBiGRU(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embeddi
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
 	bigru_encoder = Bidirectional(GRU(hidden_size),name='bigru_encoder')(embedded_layer)
 	encoder_repeat = RepeatVector(MAX_SEQUENCE_LENGTH,name='encoder_repeat')(bigru_encoder)
-
 	# Creating decoder network
 	# objective function: predicting next words (language model)
 	for i in range(num_layers):
@@ -431,12 +427,10 @@ def languageModelBiGRU(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embeddi
 def languageModelLSTMDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 50
-	num_layers = 3
 
 	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
 	encoder_layer = LSTM(hidden_size, name='lstm_enc')(embedded_layer)
-
 	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(encoder_layer)
 	model = Model(sequence_input, prediction)
 
@@ -476,12 +470,10 @@ def languageModelLSTMDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, emb
 def languageModelBiLSTMDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
 
 	hidden_size = 25
-	num_layers = 3
 
 	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
 	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
 	encoder_layer = Bidirectional(LSTM(hidden_size),name='bilstm_enc')(embedded_layer)
-
 	prediction = Dense(VOCAB_LENGTH, activation='softmax', name='dense_output')(encoder_layer)
 	model = Model(sequence_input, prediction)
 
@@ -522,40 +514,115 @@ def languageModelBiLSTMDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, e
 
 ################################################
 
-def classificationModel(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def classificationModelGRUDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, NUM_CLASSES, EMBEDDING_DIM, embedding_weights):
 
-	hidden_size = 200
+	hidden_size = 50
+	num_layers = 3
 
-	model = Sequential()
-	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
-	model.add(Dropout(0.25))
-	model.add(LSTM(hidden_size, name='lstm_enc'))
-	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
-	model.add(LSTM(hidden_size, name='lstm_dec'))
-	model.add(Dense(1, name='dense_output'))
-	model.add(Activation('sigmoid', name='last_output'))
-	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	gru_encoder = GRU(hidden_size, name='gru_encoder')(embedded_layer)
+	prediction = Dense(NUM_CLASSES, activation='softmax', name='dense_output')(gru_encoder)
+	model = Model(sequence_input, prediction)
 
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
+
+	'''
+	_________________________________________________________________
+	
+
+	'''
+
+	return model
+
+def classificationModelBiGRUDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, NUM_CLASSES, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 50
+	num_layers = 3
+
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	bigru_encoder = Bidirectional(GRU(hidden_size),name='bigru_encoder')(embedded_layer)
+	prediction = Dense(NUM_CLASSES, activation='softmax', name='dense_output')(bigru_encoder)
+	model = Model(sequence_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	'''
+	_________________________________________________________________
+	
+
+	'''
+
+	return model
+
+def classificationModelLSTMDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, NUM_CLASSES, EMBEDDING_DIM, embedding_weights):
+
+	hidden_size = 50
+
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	lstm_encoder = LSTM(hidden_size, name='lstm_encoder')(embedded_layer)
+	prediction = Dense(NUM_CLASSES, activation='softmax', name='dense_output')(lstm_encoder)
+	model = Model(sequence_input, prediction)
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	'''
+	_________________________________________________________________
+	Layer (type)                 Output Shape              Param #
+	=================================================================
+	input_1 (InputLayer)         (None, 25)                0
+	_________________________________________________________________
+	embedding_layer (Embedding)  (None, 25, 50)            140700
+	_________________________________________________________________
+	lstm_encoder (LSTM)          (None, 50)                20200
+	_________________________________________________________________
+	dense_output (Dense)         (None, 3)                 153
+	=================================================================
+	Total params: 161,053
+	Trainable params: 161,053
+	Non-trainable params: 0
+	_________________________________________________________________
+	'''
 
 	return model
 
 
-def classificationModel2(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, EMBEDDING_DIM, embedding_weights):
+def classificationModelBiLSTMDense(MAX_SEQUENCE_LENGTH, VOCAB_LENGTH, NUM_CLASSES, EMBEDDING_DIM, embedding_weights):
 
-	hidden_size = 200
+	hidden_size = 25
 
-	model = Sequential()
-	model.add(Embedding(VOCAB_LENGTH, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH, trainable = True, mask_zero=True, weights=[embedding_weights], name='embedding_layer'))
-	model.add(Dropout(0.25))
-	model.add(LSTM(hidden_size, name='lstm_enc'))
-	model.add(RepeatVector(MAX_SEQUENCE_LENGTH))
-	model.add(LSTM(hidden_size, name='lstm_dec', return_sequences=True))
-	model.add(TimeDistributed(Dense(1), name='td_output'))
-	model.add(Activation('sigmoid', name='last_output'))
-	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int64')
+	embedded_layer = Embedding(VOCAB_LENGTH, EMBEDDING_DIM, weights=[embedding_weights], trainable = True, mask_zero=True, name='embedding_layer')(sequence_input)
+	bilstm_encoder = Bidirectional(LSTM(hidden_size),name='bilstm_encoder')(embedded_layer)
+	prediction = Dense(NUM_CLASSES, activation='softmax', name='dense_output')(bilstm_encoder)
+	model = Model(sequence_input, prediction)
 
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 	print(model.summary())
+	'''
+	_________________________________________________________________
+	Layer (type)                 Output Shape              Param #
+	=================================================================
+	input_1 (InputLayer)         (None, 25)                0
+	_________________________________________________________________
+	embedding_layer (Embedding)  (None, 25, 50)            140700
+	_________________________________________________________________
+	bilstm_encoder (Bidirectiona (None, 50)                15200
+	_________________________________________________________________
+	dense_output (Dense)         (None, 3)                 153
+	=================================================================
+	Total params: 156,053
+	Trainable params: 156,053
+	Non-trainable params: 0
+	_________________________________________________________________
+
+	'''
+
 
 	return model
 
