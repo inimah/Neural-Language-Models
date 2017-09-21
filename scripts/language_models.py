@@ -235,6 +235,37 @@ def averageIdfWE(w2v_weights, vocab, documents):
 
 	return np.array(doc_embedding)
 
+# evaluate document/word vector
+def mlpClassifier(embeddings, NUM_CLASSES):
+
+	N_SAMPLES = embeddings.shape[0]
+	EMBEDDING_DIM = embeddings.shape[1]
+	hidden_size = 50
+
+	latent_vector = Input(shape=(N_SAMPLES,EMBEDDING_DIM), name='latent_vector')
+	dense_layer = Dense(hidden_size, activation='relu', name='dense_layer')(latent_vector)
+	prediction = Dense(NUM_CLASSES, activation='softmax', name='prediction')(dense_layer)
+	model = Model(latent_vector, prediction)
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	return model
+
+def mlpSeqClassifier(embeddings, NUM_CLASSES):
+
+	EMBEDDING_DIM = embeddings.shape[1]
+	hidden_size = 50
+
+	model = Sequential()
+	model.add(Dense(hidden_size, input_dim=EMBEDDING_DIM, activation='relu', name='dense_layer'))
+	model.add(Dropout(0.5))
+	model.add(Dense(NUM_CLASSES, activation='softmax', name='prediction'))
+
+	model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	print(model.summary())
+
+	return model
+
 
 ################################################
 # Neural Language Model (Sequence prediction)

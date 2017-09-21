@@ -7,7 +7,7 @@
 from __future__ import print_function
 import os
 import sys
-sys.path.insert(0,'..')
+sys.path.insert(0,'../..')
 import time
 import numpy as np
 from text_preprocessing import *
@@ -21,6 +21,7 @@ from lsa.vector_space import VectorSpace
 from lsa.tfidf import TFIDF
 from lsa.lsa import LSA
 from lsa.tokenizer import Tokenizer
+np.random.seed([3,1415])
 
 
 # Update the code and re-run due to the final-reduced version of preprocessed data
@@ -44,17 +45,135 @@ if __name__ == '__main__':
 	subject = readPickle(os.path.join(PATH,'spamas_fin_labelled_subj'))
 	subjectSW = readPickle(os.path.join(PATH,'spamas_fin_labelled_subjSW'))
 
+	# sampling 1000 documents for each class
+	spam_docs = []
+	easy_ham_docs = []
+	hard_ham_docs = [] 
+	for i, data in enumerate(subject):
+		if data[0] == 'spam':
+			spam_docs.append(data)
+		elif data[0] == 'hard_ham':
+			hard_ham_docs.append(data)
+		elif data[0] == 'easy_ham':
+			easy_ham_docs.append(data)
+
+	spam = np.array(spam_docs,dtype=object)
+	easy_ham = np.array(easy_ham_docs,dtype=object)
+	hard_ham = np.array(hard_ham_docs,dtype=object)
+
+	# shuffling data for each class
+	ind_rand1 = np.arange(len(spam))
+	np.random.shuffle(ind_rand1)
+	spam_dat = list(spam[ind_rand1])
+
+	ind_rand2 = np.arange(len(easy_ham))
+	np.random.shuffle(ind_rand2)
+	easy_ham_dat = list(easy_ham[ind_rand2])
+
+	ind_rand3 = np.arange(len(hard_ham))
+	np.random.shuffle(ind_rand3)
+	hard_ham_dat = list(hard_ham[ind_rand3])
+
+	# and sampling 1000 instances / documents
+
+	subject1000 = []
+	nSpam = len(spam_dat)
+	nEasyHam = len(easy_ham_dat)
+	nHardHam = len(hard_ham_dat)
+
+	if nSpam > 1000:
+		spam_sampling = list(spam_dat[:1001])
+	else:
+		spam_sampling = list(spam_dat)
+
+	if nEasyHam > 1000:
+		easy_ham_sampling = list(easy_ham_dat[:1001])
+	else:
+		easy_ham_sampling = list(easy_ham_dat)
+
+	if nHardHam > 1000:
+		hard_ham_sampling = list(hard_ham_dat[:1001])
+	else:
+		hard_ham_sampling = list(hard_ham_dat)
+
+	subject1000.extend(spam_sampling)
+	subject1000.extend(easy_ham_sampling)
+	subject1000.extend(hard_ham_sampling)
+
+
 	tokenized_docs = []
 	class_labels = []
-	for i, data in enumerate(subject):
+	for i, data in enumerate(subject1000):
 		class_labels.append(data[0])
 		tokenized_docs.append(data[1])
 
+	savePickle(subject1000,'subject1000')
+
+	##################################
+	# for stopword removing and stemming
+
+	spam_docsSW = []
+	easy_ham_docsSW = []
+	hard_ham_docsSW = [] 
+	for i, data in enumerate(subjectSW):
+		if data[0] == 'spam':
+			spam_docsSW.append(data)
+		elif data[0] == 'hard_ham':
+			hard_ham_docsSW.append(data)
+		elif data[0] == 'easy_ham':
+			easy_ham_docsSW.append(data)
+
+	spamSW = np.array(spam_docsSW,dtype=object)
+	easy_hamSW = np.array(easy_ham_docsSW,dtype=object)
+	hard_hamSW = np.array(hard_ham_docsSW,dtype=object)
+
+	# shuffling data for each class
+	ind_rand1SW = np.arange(len(spamSW))
+	np.random.shuffle(ind_rand1SW)
+	spam_datSW = list(spamSW[ind_rand1SW])
+
+	ind_rand2SW = np.arange(len(easy_hamSW))
+	np.random.shuffle(ind_rand2SW)
+	easy_ham_datSW = list(easy_hamSW[ind_rand2SW])
+
+	ind_rand3SW = np.arange(len(hard_hamSW))
+	np.random.shuffle(ind_rand3SW)
+	hard_ham_datSW = list(hard_hamSW[ind_rand3SW])
+
+	# and sampling 1000 instances / documents
+
+	subject1000SW = []
+	nSpamSW = len(spam_datSW)
+	nEasyHamSW = len(easy_ham_datSW)
+	nHardHamSW = len(hard_ham_datSW)
+
+	if nSpamSW > 1000:
+		spam_samplingSW = list(spam_datSW[:1001])
+	else:
+		spam_samplingSW = list(spam_datSW)
+
+	if nEasyHamSW > 1000:
+		easy_ham_samplingSW = list(easy_ham_datSW[:1001])
+	else:
+		easy_ham_samplingSW = list(easy_ham_datSW)
+
+	if nHardHamSW > 1000:
+		hard_ham_samplingSW = list(hard_ham_datSW[:1001])
+	else:
+		hard_ham_samplingSW = list(hard_ham_datSW)
+
+	subject1000SW.extend(spam_samplingSW)
+	subject1000SW.extend(easy_ham_samplingSW)
+	subject1000SW.extend(hard_ham_samplingSW)
+
 	tokenized_docsSW = []
 	class_labelsSW = []
-	for i, data in enumerate(subjectSW):
+	for i, data in enumerate(subject1000SW):
 		class_labelsSW.append(data[0])
 		tokenized_docsSW.append(data[1])
+
+	savePickle(subject1000SW,'subject1000SW')
+
 
 	############################
 	# Matrix decomposition
@@ -76,6 +195,8 @@ if __name__ == '__main__':
 	# save tf-idf matrix transformed from BOW 
 	savePickle(td_tfidf,'spamas_lsa_td_tfidf')
 	savePickle(vs.td_tfidf_info,'spamas_lsa_td_tfidf_info')
+
+	
 
 
 	############################
@@ -143,6 +264,7 @@ if __name__ == '__main__':
 	savePickle(lsa_tfidf.vt,'spamas_lsa_tfidf_vt')
 	savePickle(lsa_tfidf.transformed_matrix,'spamas_svd_tfidf')
 
+	
 
 	############################
 	# Matrix decomposition
@@ -230,8 +352,4 @@ if __name__ == '__main__':
 	savePickle(lsa_tfidfSW.vt,'spamas_lsa_tfidf_vtSW')
 	savePickle(lsa_tfidfSW.transformed_matrix,'spamas_svd_tfidfSW')
 
-
 	
-
-
-

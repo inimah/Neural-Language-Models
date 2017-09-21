@@ -7,7 +7,7 @@
 from __future__ import print_function
 import os
 import sys
-sys.path.insert(0,'..')
+sys.path.insert(0,'../..')
 import time
 import numpy as np
 from text_preprocessing import *
@@ -36,12 +36,10 @@ if __name__ == '__main__':
 	subjectSW_vocab = readPickle(os.path.join(PATH,'spamas_reducedVocabSW'))
 
 	# Final tokenized documents with labels 
-	subject = readPickle(os.path.join(PATH,'spamas_fin_labelled_subj'))
-	subjectSW = readPickle(os.path.join(PATH,'spamas_fin_labelled_subjSW'))
+	# from 1000 sampling documents
+	subject = readPickle(os.path.join(PATH,'subject1000'))
+	subjectSW = readPickle(os.path.join(PATH,'subject1000SW'))
 
-	
-
-	
 	tokenized_docs = []
 	class_labels = []
 	for i, data in enumerate(subject):
@@ -53,7 +51,6 @@ if __name__ == '__main__':
 	for i, data in enumerate(subjectSW):
 		class_labelsSW.append(data[0])
 		tokenized_docsSW.append(data[1])
-	
 
 
 	########################################################
